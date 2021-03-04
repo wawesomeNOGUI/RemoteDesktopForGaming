@@ -67,6 +67,13 @@ func echo(w http.ResponseWriter, r *http.Request) {
         // This will notify you when the peer has connected/disconnected
         peerConnection.OnICEConnectionStateChange(func(connectionState webrtc.ICEConnectionState) {
                 log.Printf("Connection State has changed %s \n", connectionState.String())
+
+                if connectionState == 5 || connectionState == 6 || connectionState == 7 {
+            			err := peerConnection.Close()  //deletes all references to this peerconnection in mem and same for ICE agent (ICE agent releases the "closed" status)?
+            			if err != nil {							   //https://www.w3.org/TR/webrtc/#dom-rtcpeerconnection-close
+            				fmt.Println(err)
+            		  }
+                }
         })
 
         for _, track := range s.GetTracks() {

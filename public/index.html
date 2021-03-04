@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <body>
+
+    <div id="remoteVideos"></div>
+
+    <div id="logs"></div>
+
+  </body>
+</head>
+<meta charset="utf-8">
+
+<script>
+var keysDown = {};
+var keyToggle = false;
+
+  window.addEventListener("load", function(evt) {
+
+      //var ws = new WebSocket("ws://162.200.58.171:80/echo");  //address to connect to, /echo triggers go echo function
+      var ws = new WebSocket("ws://localhost:80/echo");
+
+          ws.onopen = function(evt) {
+              console.log("OPEN");
+          }
+          ws.onclose = function(evt) {
+              console.log("CLOSE");
+              ws = null;
+          }
+          ws.onmessage = function(evt) {
+              console.log("RESPONSE: " + evt.data);
+              window.startSession(evt.data)
+          }
+          ws.onerror = function(evt) {
+              console.log("ERROR: " + evt.data);
+          }
+
+        //================WEBRTC Video=======================
+        /* eslint-env browser */
+
+        const pc = new RTCPeerConnection({
+          iceServers: [{
+            urls: 'stun:stun.l.google.com:19302'
+          }]
+        })
+        const log = msg => {
+          document.getElementById('logs').innerHTML += msg + '<br>'
+        }
+
+        //video player
+        pc.ontrack = event => {
+          const el = document.createElement(event.track.kind)
+          el.srcObject = event.streams[0]
+          el.autoplay = true
+          el.controls = true
+          document.getElementById('remoteVideos').appendChild(el)
+        }
+
+        pc.oniceconnectionstatechange = e => log(pc.iceConnectionState)
+
+        var sends = 0;
+
+        pc.onicecandidate = event => {
+          if(sends == 0){
+            //Send the original SDP, we'll send additional ice candidates from the
+            //onicecandidate event handler (trickle ICE)
+            ws.send( btoa(JSON.stringify(pc.localDescription)) )
+            console.log(pc.LocalDescription)
+
+            sends = 1
+          }
+          //console.log(event.candidate)
+          ws.send(JSON.stringify(event.candidate))
+        }
+/*
+        // Offer to receive 1 audio, and 1 video tracks
+        pc.addTransceiver('audio', {
+          'direction': 'recvonly'
+        })
+        pc.addTransceiver('video', {
+          'direction': 'recvonly'
+        })
+        //pc.createOffer().then(d => pc.setLocalDescription(d)).catch(console.log())
+*/
+        window.startSession = (sd) => {
+          //const sd = document.getElementById('remoteSessionDescription').value
+          if (sd === '') {
+            return alert('Session Description must not be empty')
+          }
+          try {
+            pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(atob(sd))))
+            //console.log(JSON.parse(atob(sd));
+            pc.createAnswer().then(d => pc.setLocalDescription(d)).catch(console.log)
+          } catch (e) {
+            alert(e)
+          }
+        }
+
+//=================Rover Controls=========================
+     function keyPress() {
+      for(var key in keysDown) {
+          var value = Number(key);
+            //var value = keysDown[0];
+
+         if (value == 65 || value == 37) {
+               //A || ←
+               ws.send('!l');
+         } else if(value == 68 || value == 39){
+               //D || →
+               ws.send('!r');
+         } else if(value == 87 || value == 38){
+                              //W || ↑
+              ws.send('!f');
+         } else if(value == 83 || value == 40){
+              //S || ↓
+              ws.send('!b');
+         }
+
+      }
+
+    };
+
+});
+
+
+window.addEventListener("keydown", function (event) {
+    if(keyToggle == false || keysDown[event.keyCode] == undefined){
+      keysDown[event.keyCode] = true;
+      keyToggle = true;
+      keyPress();
+    }
+  });
+
+
+  window.addEventListener("keyup", function (event) {
+      delete keysDown[event.keyCode];
+      keyToggle = false;
+      if(event.keyCode == 68 || event.keyCode == 39 || event.keyCode == 65 || event.keyCode == 37){
+          ws.send('!keyUpT');  //turn
+      }else{
+          ws.send('!keyUpM');  //move
+      }
+  });
+
+</script>
+
+</html>

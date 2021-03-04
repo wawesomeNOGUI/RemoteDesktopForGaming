@@ -20,7 +20,6 @@ var TCPChan;
 
   window.addEventListener("load", function(evt) {
 
-      //ws = new WebSocket("ws://162.200.58.171:80/echo");  //address to connect to, /echo triggers go echo function
       ws = new WebSocket("ws://localhost:80/echo");
 
           ws.onopen = function(evt) {

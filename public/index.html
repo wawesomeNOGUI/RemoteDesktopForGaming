@@ -15,10 +15,13 @@
 var keysDown = {};
 var keyToggle = false;
 
+var ws;
+var TCPChan;
+
   window.addEventListener("load", function(evt) {
 
-      //var ws = new WebSocket("ws://162.200.58.171:80/echo");  //address to connect to, /echo triggers go echo function
-      var ws = new WebSocket("ws://localhost:80/echo");
+      //ws = new WebSocket("ws://162.200.58.171:80/echo");  //address to connect to, /echo triggers go echo function
+      ws = new WebSocket("ws://localhost:80/echo");
 
           ws.onopen = function(evt) {
               console.log("OPEN");
@@ -54,12 +57,12 @@ var keyToggle = false;
           el.autoplay = true
           el.controls = true
           document.getElementById('remoteVideos').appendChild(el)
+          el.play
         }
 
         pc.oniceconnectionstatechange = e => log(pc.iceConnectionState)
 
         var sends = 0;
-
         pc.onicecandidate = event => {
           if(sends == 0){
             //Send the original SDP, we'll send additional ice candidates from the
@@ -72,16 +75,11 @@ var keyToggle = false;
           //console.log(event.candidate)
           ws.send(JSON.stringify(event.candidate))
         }
-/*
-        // Offer to receive 1 audio, and 1 video tracks
-        pc.addTransceiver('audio', {
-          'direction': 'recvonly'
-        })
-        pc.addTransceiver('video', {
-          'direction': 'recvonly'
-        })
-        //pc.createOffer().then(d => pc.setLocalDescription(d)).catch(console.log())
-*/
+
+        pc.ondatachannel = e => {
+          TCPChan = e.channel;
+        }
+
         window.startSession = (sd) => {
           //const sd = document.getElementById('remoteSessionDescription').value
           if (sd === '') {
@@ -122,7 +120,7 @@ var keyToggle = false;
 
 });
 
-
+/*
 window.addEventListener("keydown", function (event) {
     if(keyToggle == false || keysDown[event.keyCode] == undefined){
       keysDown[event.keyCode] = true;
@@ -140,6 +138,13 @@ window.addEventListener("keydown", function (event) {
       }else{
           ws.send('!keyUpM');  //move
       }
+  });
+
+*/
+
+  window.addEventListener("mousemove", function (e) {
+          var controls = {"X": e.x, "Y": e.y};
+          TCPChan.send(JSON.stringify(controls));  //turn
   });
 
 </script>

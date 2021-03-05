@@ -17,14 +17,14 @@ void MouseMove (int x, int y )
   SendInput(1,&Input,sizeof(INPUT));
 }
 
-void KeySimulate (WORD keyAscii, bool down)
+void KeySimulate (WORD keyAscii, _Bool down)
 {
   INPUT ip;
   // Set up a generic keyboard event.
   ip.type = INPUT_KEYBOARD;
   ip.ki.wScan = 0; // hardware scan code for key
   ip.ki.time = 0;
-  ip.ki.dwExtraInfo = 0
+  ip.ki.dwExtraInfo = 0;
   ip.ki.wVk = keyAscii; // virtual-key code for which key
 
   if(down){

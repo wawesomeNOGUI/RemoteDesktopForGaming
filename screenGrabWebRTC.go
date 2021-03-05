@@ -16,6 +16,27 @@ void MouseMove (int x, int y )
   Input.mi.dy = y;
   SendInput(1,&Input,sizeof(INPUT));
 }
+
+void KeySimulate (WORD keyAscii, bool down)
+{
+  INPUT ip;
+  // Set up a generic keyboard event.
+  ip.type = INPUT_KEYBOARD;
+  ip.ki.wScan = 0; // hardware scan code for key
+  ip.ki.time = 0;
+  ip.ki.dwExtraInfo = 0
+  ip.ki.wVk = keyAscii; // virtual-key code for which key
+
+  if(down){
+    ip.ki.dwFlags = 0; // 0 for key press
+    SendInput(1, &ip, sizeof(INPUT));
+  }else{
+    // Release the key
+    ip.ki.dwFlags = KEYEVENTF_KEYUP; // KEYEVENTF_KEYUP for key release
+    SendInput(1, &ip, sizeof(INPUT));
+  }
+
+}
 */
 import "C"
 

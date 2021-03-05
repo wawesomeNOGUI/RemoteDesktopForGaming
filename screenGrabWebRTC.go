@@ -108,10 +108,10 @@ if err != nil {
 
 	})
 
-  //User Input Map
-	controls := make(map[string]interface{})
 
 reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
+    //User Input Map
+    controls := make(map[string]interface{})
 
     if err := json.Unmarshal(msg.Data, &controls); err != nil {
       fmt.Println(err)

@@ -13,14 +13,13 @@
 
 <script>
 var keysDown = {};
-var keyToggle = false;
 
 var ws;
 var TCPChan;
 
   window.addEventListener("load", function(evt) {
 
-      ws = new WebSocket("ws://localhost:80/echo");
+     ws = new WebSocket("ws://localhost:80/echo");  //address to connect to, /echo triggers go echo function
 
           ws.onopen = function(evt) {
               console.log("OPEN");
@@ -51,12 +50,12 @@ var TCPChan;
 
         //video player
         pc.ontrack = event => {
-          const el = document.createElement(event.track.kind)
-          el.srcObject = event.streams[0]
-          el.autoplay = true
-          el.controls = true
-          document.getElementById('remoteVideos').appendChild(el)
-          el.play
+          const el = document.createElement(event.track.kind);
+          el.srcObject = event.streams[0];
+          el.autoplay = true;
+          el.controls = false;
+          document.getElementById('remoteVideos').appendChild(el);
+          el.play;
         }
 
         pc.oniceconnectionstatechange = e => log(pc.iceConnectionState)
@@ -119,31 +118,32 @@ var TCPChan;
 
 });
 
-/*
+
+var keyToggle = false;
+
 window.addEventListener("keydown", function (event) {
-    if(keyToggle == false || keysDown[event.keyCode] == undefined){
-      keysDown[event.keyCode] = true;
-      keyToggle = true;
-      keyPress();
-    }
-  });
+  if(keyToggle == false){
+    var kDown = {"keyDown": event.which};
+    TCPChan.send(JSON.stringify(kDown));
+    keyToggle = true;
+  }
+});
 
 
-  window.addEventListener("keyup", function (event) {
-      delete keysDown[event.keyCode];
-      keyToggle = false;
-      if(event.keyCode == 68 || event.keyCode == 39 || event.keyCode == 65 || event.keyCode == 37){
-          ws.send('!keyUpT');  //turn
-      }else{
-          ws.send('!keyUpM');  //move
-      }
-  });
+window.addEventListener("keyup", function (event) {
+  if(keyToggle == true){
+    var kUp = {"keyUp": event.which};
+    TCPChan.send(JSON.stringify(kUp));
+    keyToggle = false;
+  }
 
-*/
+});
+
+
 
   window.addEventListener("mousemove", function (e) {
-          var controls = {"X": e.x, "Y": e.y};
-          TCPChan.send(JSON.stringify(controls));  //turn
+          var mouse = {"X": e.x, "Y": e.y};
+          TCPChan.send(JSON.stringify(mouse));
   });
 
 </script>

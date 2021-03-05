@@ -37,6 +37,8 @@ void KeySimulate (WORD keyAscii, bool down)
   }
 
 }
+//https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-keybdinput
+//https://stackoverflow.com/questions/5607849/how-to-simulate-a-key-press-in-c
 */
 import "C"
 

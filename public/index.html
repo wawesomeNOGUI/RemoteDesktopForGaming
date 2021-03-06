@@ -6,7 +6,8 @@
     <!-- Has To be muted for autoplay to work -->
     <video style="pointer-events: none;" id="myVid" autoplay="true" muted="true"></video>
 
-    <button onclick="openFullscreen()"></button>
+    <button onclick="openFullscreen()">Fullscreen</button>
+    <button id="mouseToggle" onclick="rawMouseToggle()">Raw Mouse Input Toggle</button>
 
     <div id="logs"></div>
 
@@ -49,6 +50,17 @@ if(!document.fullscreenElement){     //if not in fullscreen enter fullscreen els
 	}else{
 	document.exitFullscreen();
 }
+
+}
+
+function rawMouseToggle(){
+  if (document.getElementById("mouseToggle").innerText == "Raw Mouse Input On"){
+    document.getElementById("mouseToggle").innerText = "Raw Mouse Input Off";
+    TCPChan.send("rawOff");
+  }else{
+    document.getElementById("mouseToggle").innerText = "Raw Mouse Input On";
+    TCPChan.send("rawOn");
+  }
 
 }
 //==============================================================================
@@ -177,12 +189,32 @@ window.addEventListener("keyup", function (event) {
 
 });
 
+window.addEventListener("mousemove", function (e) {
+        var mouse = {"X": e.x, "Y": e.y};
+        TCPChan.send(JSON.stringify(mouse));
+});
 
+window.addEventListener("mouseup", function (e) {
+  if(e.button == 0) { //0 = left click
+    TCPChan.send(JSON.stringify("mouseUp"));
+  }else if (e.button == 2) { //2 = right click
+    TCPChan.send(JSON.stringify("rightMouseUp"));
+  }
+});
 
-  window.addEventListener("mousemove", function (e) {
-          var mouse = {"X": e.x, "Y": e.y};
-          TCPChan.send(JSON.stringify(mouse));
-  });
+window.addEventListener("mousedown", function (e) {
+  if(e.button == 0) { //0 = left click
+    TCPChan.send(JSON.stringify("mouseDown"));
+  }else if (e.button == 2) { //2 = right click
+    TCPChan.send(JSON.stringify("rightMouseDown"));
+  }
+});
+
+//Stop Right Click Bringing Up Menu
+window.addEventListener("contextmenu", function(event){
+  event.preventDefault();   //stops right click bringing up a menu
+  //console.log("hi")
+});
 
 </script>
 

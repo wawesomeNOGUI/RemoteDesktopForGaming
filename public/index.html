@@ -4,7 +4,9 @@
   <body>
 
     <!-- Has To be muted for autoplay to work -->
-    <video id="myVid" autoplay="true" muted="true"></video>
+    <video style="pointer-events: none;" id="myVid" autoplay="true" muted="true"></video>
+
+    <button onclick="openFullscreen()"></button>
 
     <div id="logs"></div>
 
@@ -18,9 +20,42 @@ var keysDown = {};
 var ws;
 var TCPChan;
 
+//=======================Fullscreen & Canvas Resize Stuff=================================
+
+/* Get the element you want displayed in fullscreen mode (a video in this example): */
+var elem = document.getElementById("myVid");
+
+
+/* When the openFullscreen() function is executed, open the video in fullscreen.
+Note that we must include prefixes for different browsers, as they don't support the requestFullscreen method yet */
+function openFullscreen() {
+
+if(!document.fullscreenElement){     //if not in fullscreen enter fullscreen else exit fullscreen
+
+	if (elem.requestFullscreen) {
+		elem.requestFullscreen();
+		console.log("used standard");
+	} else if (elem.mozRequestFullScreen) { /* Firefox */
+		elem.mozRequestFullScreen();
+		console.log("used firefox");
+	} else if (elem.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+		elem.webkitRequestFullscreen();
+		console.log("used chrome");
+	}else if (elem.msRequestFullscreen) { /* IE/Edge ???? Edge use the chrome one? Also requires some kind of user action like html button to work*/
+		elem.msRequestFullscreen();
+		console.log("used edge");
+	}
+	console.log("yep");
+	}else{
+	document.exitFullscreen();
+}
+
+}
+//==============================================================================
+
   window.addEventListener("load", function(evt) {
 
-     ws = new WebSocket("ws://localhost:80/echo");  //address to connect to, /echo triggers go echo function
+     ws = new WebSocket("ws://162.200.58.171:80/echo");  //address to connect to, /echo triggers go echo function
 
           ws.onopen = function(evt) {
               console.log("OPEN");

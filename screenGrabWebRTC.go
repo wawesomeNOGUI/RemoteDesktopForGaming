@@ -5,8 +5,10 @@ package main
 
 void MouseMove (int x, int y )
 {
-  double fScreenWidth    = GetSystemMetrics( SM_CXSCREEN )-1;
-  double fScreenHeight  = GetSystemMetrics( SM_CYSCREEN )-1;
+  //double fScreenWidth = GetSystemMetrics( SM_CXSCREEN )-1;
+  //double fScreenHeight  = GetSystemMetrics( SM_CYSCREEN )-1;
+	double fScreenWidth = 1599;
+  double fScreenHeight  = 899;
   double fx = x*(65535.0f/fScreenWidth);
   double fy = y*(65535.0f/fScreenHeight);
   INPUT  Input={0};
@@ -102,7 +104,7 @@ import (
 	"github.com/pion/mediadevices"
 	"github.com/pion/mediadevices/examples/internal/signal"
 	//"github.com/pion/mediadevices/pkg/frame"
-	//"github.com/pion/mediadevices/pkg/prop"
+	"github.com/pion/mediadevices/pkg/prop"
 	"github.com/pion/webrtc/v3"
 
 	// If you don't like x264, you can also use vpx by importing as below
@@ -181,6 +183,8 @@ var rawInput bool = true
 
 reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 
+		fmt.Println(string(msg.Data))
+
 		//Check For Mouse Clicks
 		if string(msg.Data) == "mouseDown" {
 			C.MouseDown()
@@ -202,6 +206,7 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 			return
 		}else if string(msg.Data) == "rawOff" {
 			rawInput = false
+			fmt.Println(rawInput)
 			return
 		}
 
@@ -355,8 +360,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	openh264Params.BitRate = 1_000_000 // 1000kbps
-	//openh264Params.BitRate = 0
+	//openh264Params.BitRate = 1_000_000 // 1000kbps
+	openh264Params.BitRate = 100_000
 
 	codecSelector = mediadevices.NewCodecSelector(
 		mediadevices.WithVideoEncoders(&openh264Params),
@@ -369,8 +374,8 @@ func main() {
 		Video: func(c *mediadevices.MediaTrackConstraints) {
 			//c.FrameFormat = prop.FrameFormat(frame.FormatYUY2)
 			//c.FrameFormat = prop.FrameFormatExact(frame.FormatI420)
-			//c.Width = prop.Int(640)
-			//c.Height = prop.Int(480)
+			c.Width = prop.Int(640)
+			c.Height = prop.Int(480)
 		},
 		//Audio: func(c *mediadevices.MediaTrackConstraints) {
 		//},

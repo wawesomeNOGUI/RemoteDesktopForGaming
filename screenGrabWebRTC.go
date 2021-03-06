@@ -5,6 +5,20 @@ package main
 
 void MouseMove (int x, int y )
 {
+  double fScreenWidth    = GetSystemMetrics( SM_CXSCREEN )-1;
+  double fScreenHeight  = GetSystemMetrics( SM_CYSCREEN )-1;
+  double fx = x*(65535.0f/fScreenWidth);
+  double fy = y*(65535.0f/fScreenHeight);
+  INPUT  Input={0};
+  Input.type      = INPUT_MOUSE;
+  Input.mi.dwFlags  = MOUSEEVENTF_MOVE|MOUSEEVENTF_ABSOLUTE;
+  Input.mi.dx = x;
+  Input.mi.dy = y;
+  SendInput(1,&Input,sizeof(INPUT));
+}
+
+void MouseMoveRaw (int x, int y )
+{
   //double fScreenWidth    = ::GetSystemMetrics( SM_CXSCREEN )-1;
   //double fScreenHeight  = ::GetSystemMetrics( SM_CYSCREEN )-1;
   //double fx = x*(65535.0f/fScreenWidth);
@@ -14,6 +28,38 @@ void MouseMove (int x, int y )
   Input.mi.dwFlags  = MOUSEEVENTF_MOVE|MOUSEEVENTF_ABSOLUTE;
   Input.mi.dx = x;
   Input.mi.dy = y;
+  SendInput(1,&Input,sizeof(INPUT));
+}
+
+void MouseDown ()
+{
+  INPUT  Input={0};
+  Input.type      = INPUT_MOUSE;
+  Input.mi.dwFlags  = MOUSEEVENTF_LEFTDOWN;
+  SendInput(1,&Input,sizeof(INPUT));
+}
+
+void MouseUp ()
+{
+  INPUT  Input={0};
+  Input.type      = INPUT_MOUSE;
+  Input.mi.dwFlags  = MOUSEEVENTF_LEFTUP;
+  SendInput(1,&Input,sizeof(INPUT));
+}
+
+void RightMouseDown ()
+{
+  INPUT  Input={0};
+  Input.type      = INPUT_MOUSE;
+  Input.mi.dwFlags  = MOUSEEVENTF_RIGHTDOWN;
+  SendInput(1,&Input,sizeof(INPUT));
+}
+
+void RightMouseUp ()
+{
+  INPUT  Input={0};
+  Input.type      = INPUT_MOUSE;
+  Input.mi.dwFlags  = MOUSEEVENTF_RIGHTUP;
   SendInput(1,&Input,sizeof(INPUT));
 }
 
@@ -131,8 +177,34 @@ if err != nil {
 
 	})
 
+var rawInput bool = true
 
 reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
+
+		//Check For Mouse Clicks
+		if string(msg.Data) == "mouseDown" {
+			C.MouseDown()
+			return
+		}else if string(msg.Data) == "mouseUp" {
+			C.MouseUp()
+			return
+		}else if string(msg.Data) == "rightMouseDown" {
+			C.RightMouseDown()
+			return
+		}else if string(msg.Data) == "rightMouseUp" {
+			C.RightMouseUp()
+			return
+		}
+
+		//Check for if the message is for raw mouse input
+		if string(msg.Data) == "rawOn" {
+			rawInput = true
+			return
+		}else if string(msg.Data) == "rawOff" {
+			rawInput = false
+			return
+		}
+
     //User Input Map
     controls := make(map[string]interface{})
 
@@ -146,7 +218,12 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
       mouseX := controls["X"].(float64)  //Javascript uses float64?
       mouseY := controls["Y"].(float64)
 
-      C.MouseMove(C.int(mouseX), C.int(mouseY))
+			if rawInput {
+				C.MouseMoveRaw(C.int(mouseX), C.int(mouseY))
+			}else{
+				C.MouseMove(C.int(mouseX), C.int(mouseY))
+			}
+
 
     }else if _, ok := controls["keyDown"]; ok {
 			C.KeySimulate(C.WORD(controls["keyDown"].(float64)), true )

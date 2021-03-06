@@ -148,7 +148,12 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 
       C.MouseMove(C.int(mouseX), C.int(mouseY))
 
-    }
+    }else if _, ok := controls["keyDown"]; ok {
+			C.KeySimulate(C.WORD(controls["keyDown"].(float64)), true )
+
+		}else if _, ok := controls["keyUp"]; ok {
+			C.KeySimulate(C.WORD(controls["keyUp"].(float64)), true )
+		}
 
 })
 //==============================================================================

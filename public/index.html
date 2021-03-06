@@ -3,7 +3,8 @@
 <head>
   <body>
 
-    <div id="remoteVideos"></div>
+    <!-- Has To be muted for autoplay to work -->
+    <video id="myVid" autoplay="true" muted="true"></video>
 
     <div id="logs"></div>
 
@@ -50,12 +51,14 @@ var TCPChan;
 
         //video player
         pc.ontrack = event => {
-          const el = document.createElement(event.track.kind);
+          //const el = document.createElement(event.track.kind);
+          const el = document.getElementById("myVid");
           el.srcObject = event.streams[0];
-          el.autoplay = true;
-          el.controls = false;
-          document.getElementById('remoteVideos').appendChild(el);
-          el.play;
+          //el.autoplay = true;
+          //el.load();
+          //el.controls = false;
+          //document.getElementById('remoteVideos').appendChild(el);
+          //el.play;
         }
 
         pc.oniceconnectionstatechange = e => log(pc.iceConnectionState)

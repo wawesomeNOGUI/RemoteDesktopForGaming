@@ -100,7 +100,7 @@ import (
 	"encoding/json"
 	"fmt"
 	//"strconv"
-	//"time"
+	"time"
 
 	"github.com/gorilla/websocket"
 
@@ -183,10 +183,12 @@ if err != nil {
 	})
 
 var rawInput bool = true
+var howManyKeysDown int
+var keyChan = make(chan float64)
 
 reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 
-		fmt.Println(string(msg.Data))
+		//fmt.Println(string(msg.Data))
 
 		//Check For Mouse Clicks
 		if string(msg.Data) == "mouseDown" {
@@ -220,7 +222,7 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
       fmt.Println(err)
     }
 
-    fmt.Println(controls)
+    //fmt.Println(controls)
 
     if _, ok := controls["X"]; ok {
       mouseX := controls["X"].(float64)  //Javascript uses float64?
@@ -232,12 +234,39 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 				C.MouseMove(C.int(mouseX), C.int(mouseY))
 			}
 
-
     }else if _, ok := controls["keyDown"]; ok {
-			C.KeySimulate(C.WORD(controls["keyDown"].(float64)), true )
+			//Simulate Holding down the key by repeatedly pressing it
+			howManyKeysDown++
+			go func(){
+				myKey := controls["keyDown"].(float64)
+				for{
+					select{
+					case i := <- keyChan:
+						if i == myKey {
+							fmt.Println("KeyUp")
+							return
+						}else{
+							fmt.Println("Not Mine mine is, " , myKey , " i=" , i)
+						}
+					default:
+						time.Sleep(time.Millisecond*100)
+						C.KeySimulate(C.WORD(controls["keyDown"].(float64)), true )
+					}
+				}
+			}()
+
 
 		}else if _, ok := controls["keyUp"]; ok {
 			C.KeySimulate(C.WORD(controls["keyUp"].(float64)), false )
+			//Tell Repeating press function to stop for this key
+			go func(){
+				for i := 0; i<howManyKeysDown; i++{
+					keyChan <- controls["keyUp"].(float64)
+				}
+				howManyKeysDown--
+				fmt.Println("Done")
+			}()
+
 		}
 
 })

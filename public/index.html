@@ -189,27 +189,30 @@ window.addEventListener("keyup", function (event) {
 
 });
 
+
+
 window.addEventListener("mousemove", function (e) {
-        var mouse = {"X": e.x, "Y": e.y};
+        var x = (1600/window.innerWidth) * e.x ;
+        var y = (900/window.innerHeight) * e.y ;
+        var mouse = {"X": x, "Y": y};
         TCPChan.send(JSON.stringify(mouse));
 });
 
 window.addEventListener("mouseup", function (e) {
   if(e.button == 0) { //0 = left click
-    TCPChan.send(JSON.stringify("mouseUp"));
+    TCPChan.send("mouseUp");
   }else if (e.button == 2) { //2 = right click
-    TCPChan.send(JSON.stringify("rightMouseUp"));
+    TCPChan.send("rightMouseUp");
   }
 });
 
 window.addEventListener("mousedown", function (e) {
   if(e.button == 0) { //0 = left click
-    TCPChan.send(JSON.stringify("mouseDown"));
+    TCPChan.send("mouseDown");
   }else if (e.button == 2) { //2 = right click
-    TCPChan.send(JSON.stringify("rightMouseDown"));
+    TCPChan.send("rightMouseDown");
   }
 });
-
 //Stop Right Click Bringing Up Menu
 window.addEventListener("contextmenu", function(event){
   event.preventDefault();   //stops right click bringing up a menu

@@ -70,20 +70,25 @@ void RightMouseUp ()
 
 void KeySimulate (WORD keyAscii, _Bool down)
 {
+	//Convert the ascii code to key scan code
+	//UINT VKCode=LOBYTE(VkKeyScan(keyAscii));
+  //UINT ScanCode=MapVirtualKey(VKCode,0);
+	UINT ScanCode=MapVirtualKey(keyAscii,0);
+
   INPUT ip;
   // Set up a generic keyboard event.
   ip.type = INPUT_KEYBOARD;
-  ip.ki.wScan = 0; // hardware scan code for key
+  ip.ki.wScan = ScanCode; // hardware scan code for key (works for more applications than wVk)
   ip.ki.time = 0;
   ip.ki.dwExtraInfo = 0;
-  ip.ki.wVk = keyAscii; // virtual-key code for which key
+  ip.ki.wVk = 0; // virtual-key code for which key, set to 0 if not using
 
   if(down){
-    ip.ki.dwFlags = 0; // 0 for key press
+    ip.ki.dwFlags = KEYEVENTF_SCANCODE;
     SendInput(1, &ip, sizeof(INPUT));
   }else{
     // Release the key
-    ip.ki.dwFlags = KEYEVENTF_KEYUP; // KEYEVENTF_KEYUP for key release
+    ip.ki.dwFlags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP; // KEYEVENTF_KEYUP for key release
     SendInput(1, &ip, sizeof(INPUT));
   }
 
@@ -188,7 +193,7 @@ var keyChan = make(chan float64)
 
 reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 
-		//fmt.Println(string(msg.Data))
+		fmt.Println(string(msg.Data))
 
 		//Check For Mouse Clicks
 		if string(msg.Data) == "mouseDown" {
@@ -236,36 +241,40 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 
     }else if _, ok := controls["keyDown"]; ok {
 			//Simulate Holding down the key by repeatedly pressing it
-			howManyKeysDown++
-			go func(){
-				myKey := controls["keyDown"].(float64)
-				for{
-					select{
-					case i := <- keyChan:
-						if i == myKey {
-							fmt.Println("KeyUp")
-							return
-						}else{
-							fmt.Println("Not Mine mine is, " , myKey , " i=" , i)
+			if controls["keyDown"].(float64) != 17 {  //I don't know why ctrl doesn't work
+				howManyKeysDown++
+				go func(){
+					myKey := controls["keyDown"].(float64)
+					fmt.Println(myKey)
+					for{
+						select{
+						case i := <- keyChan:
+							if i == myKey {
+								fmt.Println("KeyUp")
+								return
+							}else{
+								fmt.Println("Not Mine mine is, " , myKey , " i=" , i)
+							}
+						default:
+							time.Sleep(time.Millisecond*100)
+							C.KeySimulate(C.WORD(myKey), true )
 						}
-					default:
-						time.Sleep(time.Millisecond*100)
-						C.KeySimulate(C.WORD(controls["keyDown"].(float64)), true )
 					}
-				}
-			}()
-
+				}()
+			}
 
 		}else if _, ok := controls["keyUp"]; ok {
-			C.KeySimulate(C.WORD(controls["keyUp"].(float64)), false )
-			//Tell Repeating press function to stop for this key
-			//go func(){
-				for i := 0; i<howManyKeysDown; i++{
-					keyChan <- controls["keyUp"].(float64)
-				}
-				howManyKeysDown--
-				fmt.Println("Done")
-		//}()
+			if controls["keyUp"].(float64) != 17 {  //I don't know why ctrl doesn't work
+				C.KeySimulate(C.WORD(controls["keyUp"].(float64)), false )
+				//Tell Repeating press function to stop for this key
+				//go func(){
+					for i := 0; i<howManyKeysDown; i++{
+						keyChan <- controls["keyUp"].(float64)
+					}
+					howManyKeysDown--
+					fmt.Println("Done")
+				//}()
+			}
 
 		}
 

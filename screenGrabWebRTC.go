@@ -259,13 +259,13 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 		}else if _, ok := controls["keyUp"]; ok {
 			C.KeySimulate(C.WORD(controls["keyUp"].(float64)), false )
 			//Tell Repeating press function to stop for this key
-			go func(){
+			//go func(){
 				for i := 0; i<howManyKeysDown; i++{
 					keyChan <- controls["keyUp"].(float64)
 				}
 				howManyKeysDown--
 				fmt.Println("Done")
-			}()
+		//}()
 
 		}
 

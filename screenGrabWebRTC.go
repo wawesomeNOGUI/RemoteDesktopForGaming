@@ -3,20 +3,23 @@ package main
 /*
 #include <windows.h>
 
-void MouseMove (int x, int y )
+void MouseMove(int nXMove, int nYMove)
 {
-  //double fScreenWidth = GetSystemMetrics( SM_CXSCREEN )-1;
-  //double fScreenHeight  = GetSystemMetrics( SM_CYSCREEN )-1;
-	double fScreenWidth = 1599;
-  double fScreenHeight  = 899;
-  double fx = x*(65535.0f/fScreenWidth);
-  double fy = y*(65535.0f/fScreenHeight);
-  INPUT  Input={0};
-  Input.type      = INPUT_MOUSE;
-  Input.mi.dwFlags  = MOUSEEVENTF_MOVE|MOUSEEVENTF_ABSOLUTE;
-  Input.mi.dx = x;
-  Input.mi.dy = y;
-  SendInput(1,&Input,sizeof(INPUT));
+	int nX, nY;
+	int nScreenWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+	int nScreenHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+	int nScreenLeft = GetSystemMetrics(SM_XVIRTUALSCREEN);
+	int nScreenTop = GetSystemMetrics(SM_YVIRTUALSCREEN);
+	INPUT Input = { 0 };
+	nX = (int)((((double)(nXMove)-nScreenLeft) * 65536) / nScreenWidth + 65536 / (nScreenWidth));
+	nY = (int)((((double)(nYMove)-nScreenTop) * 65536) / nScreenHeight + 65536 / (nScreenHeight));
+	Input.type = INPUT_MOUSE;
+	Input.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE;
+	Input.mi.dx = nX;
+	Input.mi.dy = nY;
+	Input.mi.time = GetTickCount();
+	Input.mi.dwExtraInfo = GetMessageExtraInfo();
+	SendInput(1, &Input, sizeof(INPUT));
 }
 
 void MouseMoveRaw (int x, int y )

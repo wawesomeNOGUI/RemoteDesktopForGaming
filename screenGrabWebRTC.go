@@ -68,12 +68,12 @@ void RightMouseUp ()
   SendInput(1,&Input,sizeof(INPUT));
 }
 
-void KeySimulate (WORD keyAscii, _Bool down)
+void KeySimulate (WORD keyAscii, _Bool down) //https://github.com/octalmage/robotjs/blob/master/src/keypress.c
 {
 	//Convert the ascii code to key scan code
 	//UINT VKCode=LOBYTE(VkKeyScan(keyAscii));
   //UINT ScanCode=MapVirtualKey(VKCode,0);
-	UINT ScanCode=MapVirtualKey(keyAscii,0);
+	UINT ScanCode=MapVirtualKey(keyAscii & 0xff, 0);
 
   INPUT ip;
   // Set up a generic keyboard event.
@@ -88,6 +88,9 @@ void KeySimulate (WORD keyAscii, _Bool down)
     SendInput(1, &ip, sizeof(INPUT));
   }else{
     // Release the key
+		// Set the scan code for keyup
+		ScanCode |= 0x80;
+		ip.ki.wScan = ScanCode;
     ip.ki.dwFlags = KEYEVENTF_SCANCODE | KEYEVENTF_KEYUP; // KEYEVENTF_KEYUP for key release
     SendInput(1, &ip, sizeof(INPUT));
   }
@@ -264,16 +267,15 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 			}
 
 		}else if _, ok := controls["keyUp"]; ok {
-			if controls["keyUp"].(float64) != 17 {  //I don't know why ctrl doesn't work
-				C.KeySimulate(C.WORD(controls["keyUp"].(float64)), false )
+			if controls["keyUp"].(float64) != 17 {  //Extended keys work differnt, check out robot.js keypress.c
 				//Tell Repeating press function to stop for this key
-				//go func(){
 					for i := 0; i<howManyKeysDown; i++{
 						keyChan <- controls["keyUp"].(float64)
 					}
 					howManyKeysDown--
 					fmt.Println("Done")
-				//}()
+
+					C.KeySimulate(C.WORD(controls["keyUp"].(float64)), false )
 			}
 
 		}

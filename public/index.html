@@ -16,7 +16,6 @@
 <meta charset="utf-8">
 
 <script>
-var keysDown = {};
 
 var ws;
 var TCPChan;
@@ -142,49 +141,28 @@ function rawMouseToggle(){
           }
         }
 
-//=================Rover Controls=========================
-     function keyPress() {
-      for(var key in keysDown) {
-          var value = Number(key);
-            //var value = keysDown[0];
-
-         if (value == 65 || value == 37) {
-               //A || ←
-               ws.send('!l');
-         } else if(value == 68 || value == 39){
-               //D || →
-               ws.send('!r');
-         } else if(value == 87 || value == 38){
-                              //W || ↑
-              ws.send('!f');
-         } else if(value == 83 || value == 40){
-              //S || ↓
-              ws.send('!b');
-         }
-
-      }
-
-    };
-
 });
 
 
 var keyToggle = false;
+var keysDown = {};
 
 window.addEventListener("keydown", function (event) {
   if(keyToggle == false){
     var kDown = {"keyDown": event.which};   //event.key gets the ascii character
     TCPChan.send(JSON.stringify(kDown));    //event.which gets the ascii code
     keyToggle = true;
+    keysDown[event.which] = true;
   }
 });
 
 
 window.addEventListener("keyup", function (event) {
-  if(keyToggle == true){
+  if(keyToggle == true && keysDown[event.which] == true){
     var kUp = {"keyUp": event.which};
     TCPChan.send(JSON.stringify(kUp));
     keyToggle = false;
+    delete keysDown[event.which]
   }
 
 });

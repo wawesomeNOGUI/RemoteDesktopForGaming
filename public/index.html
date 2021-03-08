@@ -173,8 +173,8 @@ var keyToggle = false;
 
 window.addEventListener("keydown", function (event) {
   if(keyToggle == false){
-    var kDown = {"keyDown": event.which};
-    TCPChan.send(JSON.stringify(kDown));
+    var kDown = {"keyDown": event.which};   //event.key gets the ascii character
+    TCPChan.send(JSON.stringify(kDown));    //event.which gets the ascii code
     keyToggle = true;
   }
 });

@@ -148,6 +148,16 @@ func echo(w http.ResponseWriter, r *http.Request) {
 	}
 	defer c.Close()
 
+	//First Wait for the password:
+	_, message, err2 := c.ReadMessage() //ReadMessage blocks until message received
+	if err2 != nil {
+		log.Println("read:", err)
+	}
+
+	if string(message) != "heyGamer" {
+		return  //if password wrong don't let gamer connect
+	}
+
 	//webrtc stuffffffffff
 
 	config := webrtc.Configuration{
@@ -249,7 +259,7 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 				go func(){
 					myKey := controls["keyDown"].(float64)
 					fmt.Println(myKey)
-					for{
+					for i:=0; i<1000; i++{
 						select{
 						case i := <- keyChan:
 							if i == myKey {
@@ -265,6 +275,9 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 
 						}
 					}
+
+					//If been on too long, we'll go ahead and stop the function
+					howManyKeysDown--
 				}()
 			}
 
@@ -406,7 +419,7 @@ func main() {
 		panic(err)
 	}
 	//openh264Params.BitRate = 1_000_000 // 1000kbps
-	openh264Params.BitRate = 100_000
+	openh264Params.BitRate = 0
 
 	codecSelector = mediadevices.NewCodecSelector(
 		mediadevices.WithVideoEncoders(&openh264Params),

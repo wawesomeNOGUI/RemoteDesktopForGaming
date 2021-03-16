@@ -11,6 +11,9 @@
 
     <div id="logs"></div>
 
+    <input id="password">Type Password Here</input>
+    <button onclick="sendPassword()">Send Password</button>
+
   </body>
 </head>
 <meta charset="utf-8">
@@ -19,6 +22,12 @@
 
 var ws;
 var TCPChan;
+
+function sendPassword(){
+  var a = document.getElementById("password").value;
+  ws.send(a);
+}
+
 
 //=======================Fullscreen & Canvas Resize Stuff=================================
 
@@ -74,6 +83,7 @@ function rawMouseToggle(){
           ws.onclose = function(evt) {
               console.log("CLOSE");
               ws = null;
+              document.write("Websocket Close");
           }
           ws.onmessage = function(evt) {
               console.log("RESPONSE: " + evt.data);

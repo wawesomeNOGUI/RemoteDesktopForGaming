@@ -244,7 +244,7 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 
     }else if _, ok := controls["keyDown"]; ok {
 			//Simulate Holding down the key by repeatedly pressing it
-			if controls["keyDown"].(float64) != 17 {  //I don't know why ctrl doesn't work
+			if controls["keyDown"].(float64) != 17 {  //Extended keys work differnt, check out robot.js keypress.c, 17 is the ctrl key
 				howManyKeysDown++
 				go func(){
 					myKey := controls["keyDown"].(float64)
@@ -259,8 +259,10 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 								fmt.Println("Not Mine mine is, " , myKey , " i=" , i)
 							}
 						default:
+							C.KeySimulate(C.WORD(myKey), true )  //true = down
 							time.Sleep(time.Millisecond*100)
-							C.KeySimulate(C.WORD(myKey), true )
+							C.KeySimulate(C.WORD(myKey), false )  //false = up
+
 						}
 					}
 				}()

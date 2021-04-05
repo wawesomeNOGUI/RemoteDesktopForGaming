@@ -115,17 +115,17 @@ import (
 	"github.com/pion/mediadevices"
 	"github.com/pion/mediadevices/examples/internal/signal"
 	//"github.com/pion/mediadevices/pkg/frame"
-	"github.com/pion/mediadevices/pkg/prop"
+	//"github.com/pion/mediadevices/pkg/prop"
 	"github.com/pion/webrtc/v3"
 
 	// If you don't like x264, you can also use vpx by importing as below
 	// "github.com/pion/mediadevices/pkg/codec/vpx" // This is required to use VP8/VP9 video encoder
 	// or you can also use openh264 for alternative h264 implementation
-	"github.com/pion/mediadevices/pkg/codec/openh264"
+	//"github.com/pion/mediadevices/pkg/codec/openh264"
 	// or if you use a raspberry pi like, you can use mmal for using its hardware encoder
 	//"github.com/pion/mediadevices/pkg/codec/mmal"
 	//"github.com/pion/mediadevices/pkg/codec/opus" // This is required to use opus audio encoder
-	//"github.com/pion/mediadevices/pkg/codec/x264" // This is required to use h264 video encoder
+	"github.com/pion/mediadevices/pkg/codec/x264" // This is required to use h264 video encoder
 
 	// Note: If you don't have a camera or microphone or your adapters are not supported,
 	//       you can always swap your adapters with our dummy adapters below.
@@ -151,10 +151,10 @@ func echo(w http.ResponseWriter, r *http.Request) {
 	//First Wait for the password:
 	_, message, err2 := c.ReadMessage() //ReadMessage blocks until message received
 	if err2 != nil {
-		log.Println("read:", err)
+		log.Println("readPassErr:", err)
 	}
 
-	if string(message) != "heyGamer" {
+	if string(message) != "itGameTime" {
 		return  //if password wrong don't let gamer connect
 	}
 
@@ -206,7 +206,7 @@ var keyChan = make(chan float64)
 
 reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 
-		fmt.Println(string(msg.Data))
+		//fmt.Println(string(msg.Data))
 
 		//Check For Mouse Clicks
 		if string(msg.Data) == "mouseDown" {
@@ -229,7 +229,7 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 			return
 		}else if string(msg.Data) == "rawOff" {
 			rawInput = false
-			fmt.Println(rawInput)
+			//fmt.Println(rawInput)
 			return
 		}
 
@@ -258,15 +258,15 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 				howManyKeysDown++
 				go func(){
 					myKey := controls["keyDown"].(float64)
-					fmt.Println(myKey)
+					//fmt.Println(myKey)
 					for i:=0; i<1000; i++{
 						select{
 						case i := <- keyChan:
 							if i == myKey {
-								fmt.Println("KeyUp")
+								//fmt.Println("KeyUp")
 								return
 							}else{
-								fmt.Println("Not Mine mine is, " , myKey , " i=" , i)
+								//fmt.Println("Not Mine mine is, " , myKey , " i=" , i)
 							}
 						default:
 							C.KeySimulate(C.WORD(myKey), true )  //true = down
@@ -288,7 +288,7 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 						keyChan <- controls["keyUp"].(float64)
 					}
 					howManyKeysDown--
-					fmt.Println("Done")
+					//fmt.Println("Done")
 
 					C.KeySimulate(C.WORD(controls["keyUp"].(float64)), false )
 			}
@@ -355,7 +355,7 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 	//Wait for the browser to return an answer (its SDP)
 	msgType, message, err2 := c.ReadMessage() //ReadMessage blocks until message received
 	if err2 != nil {
-		log.Println("read:", err)
+		log.Println("readSDPErr:", err)
 	}
 
 	answer := webrtc.SessionDescription{}
@@ -377,7 +377,7 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 	for {
 		_, message, err2 := c.ReadMessage() //ReadMessage blocks until message received
 		if err2 != nil {
-			fmt.Println("read:", err)
+			fmt.Println("readTrickleICEErr:", err)
 		}
 
 		//If staement to make sure we aren't adding websocket error messages to ICE
@@ -404,7 +404,7 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 //==================Global WebRTC Vars==========================================
 //var peerConnection PeerConnection
 var s mediadevices.MediaStream
-var openh264Params openh264.Params
+var x264Params x264.Params
 var codecSelector *mediadevices.CodecSelector
 var mediaEngine = webrtc.MediaEngine{}
 var api = webrtc.NewAPI(webrtc.WithMediaEngine(&mediaEngine))
@@ -414,15 +414,18 @@ var api = webrtc.NewAPI(webrtc.WithMediaEngine(&mediaEngine))
 func main() {
 
 	//Setup Video Stream
-	openh264Params, err := openh264.NewParams()
+	x264Params, err := x264.NewParams()
 	if err != nil {
 		panic(err)
 	}
-	//openh264Params.BitRate = 1_000_000 // 1000kbps
-	openh264Params.BitRate = 0
+	x264Params.BitRate = 8_000_000 // 1000kbps
+	x264Params.KeyFrameInterval = 1  //default 60
+	x264Params.Preset = x264.PresetVeryfast
+	//openh264Params.BitRate = 4_000_000 // 4000kbps
+	//openh264Params.BitRate = 0
 
 	codecSelector = mediadevices.NewCodecSelector(
-		mediadevices.WithVideoEncoders(&openh264Params),
+		mediadevices.WithVideoEncoders(&x264Params),
 		//mediadevices.WithAudioEncoders(&opusParams),
 	)
 
@@ -432,8 +435,8 @@ func main() {
 		Video: func(c *mediadevices.MediaTrackConstraints) {
 			//c.FrameFormat = prop.FrameFormat(frame.FormatYUY2)
 			//c.FrameFormat = prop.FrameFormatExact(frame.FormatI420)
-			c.Width = prop.Int(640)
-			c.Height = prop.Int(480)
+			//c.Width = prop.Int(640)
+			//c.Height = prop.Int(480)
 		},
 		//Audio: func(c *mediadevices.MediaTrackConstraints) {
 		//},

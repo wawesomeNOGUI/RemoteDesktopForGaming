@@ -201,7 +201,13 @@ if err != nil {
 
 	})
 
-var rawInput bool = true
+var rawInput bool = false
+var fpMouse bool = false
+type MousePos struct {
+    X float64
+    Y float64
+}
+var mousePos MousePos
 
 reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 
@@ -232,6 +238,16 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 			return
 		}
 
+		//Check for First Person Mouse Mode
+		if string(msg.Data) == "fpMouseOn" {
+			fpMouse = true
+			return
+		}else if string(msg.Data) == "fpMouseOff" {
+			fpMouse = false
+			//fmt.Println(rawInput)
+			return
+		}
+
     //User Input Map
     controls := make(map[string]interface{})
 
@@ -245,10 +261,20 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
       mouseX := controls["X"].(float64)  //Javascript uses float64?
       mouseY := controls["Y"].(float64)
 
-			if rawInput {
-				C.MouseMoveRaw(C.int(mouseX), C.int(mouseY))
+			if fpMouse {
+				if rawInput{
+					mousePos.X = 1600 / 2
+					mousePos.Y = 900 / 2
+					C.MouseMoveRaw(C.int(mousePos.X + mouseX), C.int(mousePos.Y + mouseY))
+				}else{
+					C.MouseMove(C.int(mouseX), C.int(mouseY))
+				}
 			}else{
-				C.MouseMove(C.int(mouseX), C.int(mouseY))
+				if rawInput{
+					C.MouseMoveRaw(C.int(mouseX), C.int(mouseY))
+				}else{
+					C.MouseMove(C.int(mouseX), C.int(mouseY))
+				}
 			}
 
     }else if _, ok := controls["keyDown"]; ok {

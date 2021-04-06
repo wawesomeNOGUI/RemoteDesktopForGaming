@@ -252,43 +252,17 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 			}
 
     }else if _, ok := controls["keyDown"]; ok {
-			//Simulate Holding down the key by repeatedly pressing it
 			if controls["keyDown"].(float64) != 17 {  //Extended keys work differnt, check out robot.js keypress.c, 17 is the ctrl key
-				keysDown.Store(controls["keyDown"].(float64), true)
-
-/*
-				howManyKeysDown++
-				go func(){
-					myKey := controls["keyDown"].(float64)
-					//fmt.Println(myKey)
-					for i:=0; i<1000; i++{
-						select{
-						case i := <- keyChan:
-							if i == myKey {
-								//fmt.Println("KeyUp")
-								C.KeySimulate(C.WORD(myKey), false )  //false = up
-								return
-							}else{
-								//fmt.Println("Not Mine mine is, " , myKey , " i=" , i)
-							}
-						default:
-							C.KeySimulate(C.WORD(myKey), true )  //true = down
-							time.Sleep(time.Millisecond*100)
-
-						}
-					}
-
-					//If been on too long, we'll go ahead and stop the function
-					howManyKeysDown--
-				}()
-*/
+				//Simulate one press so we don't have to wait for keyLoop for first press
+				C.KeySimulate(C.WORD(controls["keyDown"].(float64)), true)
+				keysDown.Store(controls["keyDown"].(float64), 0)
 			}
 
 		}else if _, ok := controls["keyUp"]; ok {
 			if controls["keyUp"].(float64) != 17 {  //Extended keys work differnt, check out robot.js keypress.c
 				//delete value from the sync.Map and make key "dirty", to mark for
 				//key deletion in garbage collection? https://golang.org/src/sync/map.go?s=9414:9451#L282
-				keysDown.Delete(controls["keyDown"].(float64))
+				keysDown.Delete(controls["keyUp"].(float64))
 				//simulate keyup
 				C.KeySimulate(C.WORD(controls["keyUp"].(float64)), false)
 			}
@@ -304,12 +278,6 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 			log.Printf("Track (ID: %s) ended with error: %v\n",
 				track.ID(), err)
 		})
-
-		// In Pion/webrtc v3, bind will be called automatically after SDP negotiation
-		//webrtcTrack, err := track.Bind(peerConnection)
-		//if err != nil {
-		//        panic(err)
-		//}
 
 		_, err = peerConnection.AddTransceiverFromTrack(track,
 			webrtc.RtpTransceiverInit{
@@ -416,7 +384,14 @@ var api = webrtc.NewAPI(webrtc.WithMediaEngine(&mediaEngine))
 func keyLoop(){
 	for {
 		keysDown.Range(func(key, value interface{}) bool {
-			C.KeySimulate(C.WORD(key.(float64)), true)
+			//simulate keyDown
+			if value.(int) == 1 {
+				C.KeySimulate(C.WORD(key.(float64)), true)
+			}else{
+				 //the 1 means has been through the keyLoop once, so start doing more presses
+				keysDown.Store(key, 1)
+			}
+
 			return true
 		})
 		time.Sleep(time.Millisecond*150)
@@ -424,6 +399,7 @@ func keyLoop(){
 }
 
 var keysDown sync.Map
+//==============================================================================
 
 func main() {
 

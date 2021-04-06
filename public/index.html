@@ -4,10 +4,11 @@
   <body>
 
     <!-- Has To be muted for autoplay to work -->
-    <video style="pointer-events: none; cursor: none;" id="myVid" autoplay="true" muted="true"></video>
+    <video style="pointer-events: none;" style="cursor: none;" id="myVid" autoplay="true" muted="true"></video>
 
     <button onclick="openFullscreen()">Fullscreen</button>
-    <button id="mouseToggle" onclick="rawMouseToggle()">Raw Mouse Input Toggle</button>
+    <button id="mouseToggle" onclick="rawMouseToggle()">Raw Mouse Input Off</button>
+    <button id="gameMode" onclick="mouseModeToggle()">First Person Mouse Off</button>
 
     <div id="logs"></div>
 
@@ -22,6 +23,7 @@
 
 var ws;
 var TCPChan;
+var fpMouse = false;
 
 function sendPassword(){
   var a = document.getElementById("password").value;
@@ -70,6 +72,18 @@ function rawMouseToggle(){
     TCPChan.send("rawOn");
   }
 
+}
+
+function mouseModeToggle(){
+  if (document.getElementById("gameMode").innerText == "First Person Mouse Off"){
+    document.getElementById("gameMode").innerText = "First Person Mouse On";
+    TCPChan.send("fpMouseOn");
+    fpMouse = true;
+  }else{
+    document.getElementById("gameMode").innerText = "First Person Mouse Off";
+    TCPChan.send("fpMouseOff");
+    fpMouse = false;
+  }
 }
 //==============================================================================
 
@@ -177,13 +191,41 @@ window.addEventListener("keyup", function (event) {
 
 });
 
-
+var pMouse = {
+  x: 0,
+  y: 0
+};
+var mouse = {
+  "X": 0,
+  "Y": 0
+};
 
 window.addEventListener("mousemove", function (e) {
+      if(fpMouse == false){
         var x = (1600/window.innerWidth) * e.x ;
         var y = (900/window.innerHeight) * e.y ;
-        var mouse = {"X": x, "Y": y};
+        mouse["X"] = x;
+        mouse["Y"] = y;
         TCPChan.send(JSON.stringify(mouse));
+      }else if (fpMouse){
+        if(pMouse.x < e.x){ //right
+          mouse["X"] = e.x - pMouse.x;
+          pMouse.x = e.x;
+        }else if( pMouse.x > e.x ){  //left
+          mouse["X"] = e.x - pMouse.x;
+          pMouse.x = e.x;
+        }
+        if(pMouse.y < e.y){  //up
+          mouse["Y"] = e.y - pMouse.y;
+          pMouse.y = e.y;
+        }else if( pMouse.y > e.y ){ //down
+          mouse["Y"] = pMouse.y - e.y;
+          pMouse.y = e.y;
+        }
+
+        TCPChan.send(JSON.stringify(mouse));
+      }
+
 });
 
 window.addEventListener("mouseup", function (e) {

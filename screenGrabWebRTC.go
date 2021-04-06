@@ -109,6 +109,7 @@ import (
 	"fmt"
 	//"strconv"
 	"time"
+	"sync"
 
 	"github.com/gorilla/websocket"
 
@@ -201,8 +202,6 @@ if err != nil {
 	})
 
 var rawInput bool = true
-var howManyKeysDown int
-var keyChan = make(chan float64)
 
 reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 
@@ -255,6 +254,9 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
     }else if _, ok := controls["keyDown"]; ok {
 			//Simulate Holding down the key by repeatedly pressing it
 			if controls["keyDown"].(float64) != 17 {  //Extended keys work differnt, check out robot.js keypress.c, 17 is the ctrl key
+				keysDown.Store(controls["keyDown"].(float64), true)
+
+/*
 				howManyKeysDown++
 				go func(){
 					myKey := controls["keyDown"].(float64)
@@ -264,6 +266,7 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 						case i := <- keyChan:
 							if i == myKey {
 								//fmt.Println("KeyUp")
+								C.KeySimulate(C.WORD(myKey), false )  //false = up
 								return
 							}else{
 								//fmt.Println("Not Mine mine is, " , myKey , " i=" , i)
@@ -271,7 +274,6 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 						default:
 							C.KeySimulate(C.WORD(myKey), true )  //true = down
 							time.Sleep(time.Millisecond*100)
-							C.KeySimulate(C.WORD(myKey), false )  //false = up
 
 						}
 					}
@@ -279,18 +281,16 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 					//If been on too long, we'll go ahead and stop the function
 					howManyKeysDown--
 				}()
+*/
 			}
 
 		}else if _, ok := controls["keyUp"]; ok {
 			if controls["keyUp"].(float64) != 17 {  //Extended keys work differnt, check out robot.js keypress.c
-				//Tell Repeating press function to stop for this key
-					for i := 0; i<howManyKeysDown; i++{
-						keyChan <- controls["keyUp"].(float64)
-					}
-					howManyKeysDown--
-					//fmt.Println("Done")
-
-					C.KeySimulate(C.WORD(controls["keyUp"].(float64)), false )
+				//delete value from the sync.Map and make key "dirty", to mark for
+				//key deletion in garbage collection? https://golang.org/src/sync/map.go?s=9414:9451#L282
+				keysDown.Delete(controls["keyDown"].(float64))
+				//simulate keyup
+				C.KeySimulate(C.WORD(controls["keyUp"].(float64)), false)
 			}
 
 		}
@@ -411,6 +411,20 @@ var api = webrtc.NewAPI(webrtc.WithMediaEngine(&mediaEngine))
 
 //==============================================================================
 
+//===================Key Simulation Stuff=======================================
+//repeatedly press keys that are down
+func keyLoop(){
+	for {
+		keysDown.Range(func(key, value interface{}) bool {
+			C.KeySimulate(C.WORD(key.(float64)), true)
+			return true
+		})
+		time.Sleep(time.Millisecond*150)
+	}
+}
+
+var keysDown sync.Map
+
 func main() {
 
 	//Setup Video Stream
@@ -445,6 +459,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	//Start keyLoop
+	go keyLoop()
 
 	fileServer := http.FileServer(http.Dir("./public"))
 	http.HandleFunc("/echo", echo) //this request comes from webrtc.html

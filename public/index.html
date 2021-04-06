@@ -4,7 +4,7 @@
   <body>
 
     <!-- Has To be muted for autoplay to work -->
-    <video style="pointer-events: none;" id="myVid" autoplay="true" muted="true"></video>
+    <video style="pointer-events: none; cursor: none;" id="myVid" autoplay="true" muted="true"></video>
 
     <button onclick="openFullscreen()">Fullscreen</button>
     <button id="mouseToggle" onclick="rawMouseToggle()">Raw Mouse Input Toggle</button>
@@ -158,7 +158,7 @@ var keyToggle = false;
 var keysDown = {};
 
 window.addEventListener("keydown", function (event) {
-  if(keyToggle == false){
+  if(keysDown[event.which] != true){
     var kDown = {"keyDown": event.which};   //event.key gets the ascii character
     TCPChan.send(JSON.stringify(kDown));    //event.which gets the ascii code
     keyToggle = true;
@@ -168,11 +168,11 @@ window.addEventListener("keydown", function (event) {
 
 
 window.addEventListener("keyup", function (event) {
-  if(keyToggle == true && keysDown[event.which] == true){
+  if(keysDown[event.which] == true){
     var kUp = {"keyUp": event.which};
     TCPChan.send(JSON.stringify(kUp));
     keyToggle = false;
-    delete keysDown[event.which]
+    delete keysDown[event.which] // Piunno wrote this using this code, 4/5/21
   }
 
 });

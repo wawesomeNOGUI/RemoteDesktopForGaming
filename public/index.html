@@ -4,7 +4,7 @@
   <body>
 
     <!-- Has To be muted for autoplay to work -->
-    <video style="pointer-events: none;" style="cursor: none;" id="myVid" autoplay="true" muted="true"></video>
+    <video style="cursor: none; pointer-events: none;" id="myVid" autoplay muted playsinline></video>
 
     <button onclick="openFullscreen()">Fullscreen</button>
     <button id="mouseToggle" onclick="rawMouseToggle()">Raw Mouse Input Off</button>
@@ -85,6 +85,10 @@ function mouseModeToggle(){
     fpMouse = false;
   }
 }
+
+const log = msg => {
+  document.getElementById('logs').innerHTML += msg + '<br>'
+}
 //==============================================================================
 
   window.addEventListener("load", function(evt) {
@@ -115,9 +119,6 @@ function mouseModeToggle(){
             urls: 'stun:stun.l.google.com:19302'
           }]
         })
-        const log = msg => {
-          document.getElementById('logs').innerHTML += msg + '<br>'
-        }
 
         //video player
         pc.ontrack = event => {
@@ -191,41 +192,28 @@ window.addEventListener("keyup", function (event) {
 
 });
 
-var pMouse = {
-  x: 0,
-  y: 0
-};
 var mouse = {
   "X": 0,
   "Y": 0
 };
 
 window.addEventListener("mousemove", function (e) {
-      if(fpMouse == false){
-        var x = (1600/window.innerWidth) * e.x ;
-        var y = (900/window.innerHeight) * e.y ;
-        mouse["X"] = x;
-        mouse["Y"] = y;
-        TCPChan.send(JSON.stringify(mouse));
-      }else if (fpMouse){
-        if(pMouse.x < e.x){ //right
-          mouse["X"] = e.x - pMouse.x;
-          pMouse.x = e.x;
-        }else if( pMouse.x > e.x ){  //left
-          mouse["X"] = e.x - pMouse.x;
-          pMouse.x = e.x;
-        }
-        if(pMouse.y < e.y){  //up
-          mouse["Y"] = e.y - pMouse.y;
-          pMouse.y = e.y;
-        }else if( pMouse.y > e.y ){ //down
-          mouse["Y"] = pMouse.y - e.y;
-          pMouse.y = e.y;
-        }
+  if(fpMouse){
+    //https://www.w3schools.com/jsref/obj_mouseevent.asp
+    //movementX/Y relative to last mousemove
+    if(e.movementX != 0){
+      mouse.X = (1600/window.innerWidth) * e.movementX;
+    }
+    if(e.movementY != 0){
+      mouse.Y = (900/window.innerHeight) * e.movementY;
+    }
+  }else{
+    mouse.X = (1600/window.innerWidth) * e.x;
+    mouse.Y = (900/window.innerHeight) * e.y;
+  }
 
-        TCPChan.send(JSON.stringify(mouse));
-      }
 
+  TCPChan.send(JSON.stringify(mouse));
 });
 
 window.addEventListener("mouseup", function (e) {

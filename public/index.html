@@ -4,11 +4,14 @@
   <body>
 
     <!-- Has To be muted for autoplay to work -->
-    <video style="cursor: none; pointer-events: none;" id="myVid" autoplay muted playsinline></video>
+    <div id="vidDiv" style="">
+    <video style="pointer-events: none;" id="myVid" autoplay muted playsinline></video>
+    </div>
 
     <button onclick="openFullscreen()">Fullscreen</button>
     <button id="mouseToggle" onclick="rawMouseToggle()">Raw Mouse Input Off</button>
     <button id="gameMode" onclick="mouseModeToggle()">First Person Mouse Off</button>
+    <button id="cursorToggle" onclick="cursorToggle()">Cursor On</button>
 
     <div id="logs"></div>
 
@@ -34,7 +37,7 @@ function sendPassword(){
 //=======================Fullscreen & Canvas Resize Stuff=================================
 
 /* Get the element you want displayed in fullscreen mode (a video in this example): */
-var elem = document.getElementById("myVid");
+var elem = document.getElementById("vidDiv");
 
 
 /* When the openFullscreen() function is executed, open the video in fullscreen.
@@ -42,7 +45,6 @@ Note that we must include prefixes for different browsers, as they don't support
 function openFullscreen() {
 
 if(!document.fullscreenElement){     //if not in fullscreen enter fullscreen else exit fullscreen
-
 	if (elem.requestFullscreen) {
 		elem.requestFullscreen();
 		console.log("used standard");
@@ -57,10 +59,17 @@ if(!document.fullscreenElement){     //if not in fullscreen enter fullscreen els
 		console.log("used edge");
 	}
 	console.log("yep");
+
 	}else{
 	document.exitFullscreen();
 }
 
+}
+
+function resizeVideo(){
+  //Resize video
+  document.getElementById("myVid").width = window.innerWidth;
+  document.getElementById("myVid").height = window.innerHeight;
 }
 
 function rawMouseToggle(){
@@ -83,6 +92,16 @@ function mouseModeToggle(){
     document.getElementById("gameMode").innerText = "First Person Mouse Off";
     TCPChan.send("fpMouseOff");
     fpMouse = false;
+  }
+}
+
+function cursorToggle(){
+  if (document.getElementById("cursorToggle").innerText == "Cursor On"){
+    document.getElementById("vidDiv").style = "cursor: none";
+    document.getElementById("cursorToggle").innerText = "Cursor Off";
+  }else{
+    document.getElementById("vidDiv").style = "";
+    document.getElementById("cursorToggle").innerText = "Cursor On";
   }
 }
 
@@ -236,6 +255,8 @@ window.addEventListener("contextmenu", function(event){
   event.preventDefault();   //stops right click bringing up a menu
   //console.log("hi")
 });
+
+window.addEventListener('resize', resizeVideo);
 
 </script>
 

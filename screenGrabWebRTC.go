@@ -10,9 +10,10 @@ void MouseMove(int nXMove, int nYMove)
 	int nScreenHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN);
 	int nScreenLeft = GetSystemMetrics(SM_XVIRTUALSCREEN);
 	int nScreenTop = GetSystemMetrics(SM_YVIRTUALSCREEN);
+
 	INPUT Input = { 0 };
-	nX = (int)((((double)(nXMove)-nScreenLeft) * 65536) / nScreenWidth + 65536 / (nScreenWidth));
-	nY = (int)((((double)(nYMove)-nScreenTop) * 65536) / nScreenHeight + 65536 / (nScreenHeight));
+  nX = (int)((((double)(nXMove)-nScreenLeft) * 65536) / nScreenWidth + 65536 / (nScreenWidth));
+	nY = (int)((( (double) (nYMove)-nScreenTop) * 65536) / nScreenHeight + 65536 / (nScreenHeight));
 	Input.type = INPUT_MOUSE;
 	Input.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE;
 	Input.mi.dx = nX;
@@ -22,12 +23,37 @@ void MouseMove(int nXMove, int nYMove)
 	SendInput(1, &Input, sizeof(INPUT));
 }
 
+void MouseMoveFor3DGames(int nXMove, int nYMove)
+{
+	int nX, nY;
+	int nScreenWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+	int nScreenHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+	int nScreenLeft = GetSystemMetrics(SM_XVIRTUALSCREEN);
+	int nScreenTop = GetSystemMetrics(SM_YVIRTUALSCREEN);
+
+	POINT cursor;
+	GetCursorPos(&cursor);
+
+	INPUT Input = { 0 };
+	nX = (int)((((double)(nXMove + cursor.x)-nScreenLeft) * 65536) / nScreenWidth + 65536 / (nScreenWidth));
+	nY = (int)((( (double) (nYMove + cursor.y)-nScreenTop) * 65536) / nScreenHeight + 65536 / (nScreenHeight));
+	Input.type = INPUT_MOUSE;
+	Input.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE;
+	Input.mi.dx = nX;
+	Input.mi.dy = nY;
+	Input.mi.time = GetTickCount();
+	Input.mi.dwExtraInfo = GetMessageExtraInfo();
+	SendInput(1, &Input, sizeof(INPUT));
+}
+
+
 void MouseMoveRaw (int x, int y )
 {
   //double fScreenWidth    = ::GetSystemMetrics( SM_CXSCREEN )-1;
   //double fScreenHeight  = ::GetSystemMetrics( SM_CYSCREEN )-1;
   //double fx = x*(65535.0f/fScreenWidth);
   //double fy = y*(65535.0f/fScreenHeight);
+
   INPUT  Input={0};
   Input.type      = INPUT_MOUSE;
   Input.mi.dwFlags  = MOUSEEVENTF_MOVE|MOUSEEVENTF_ABSOLUTE;
@@ -203,13 +229,11 @@ if err != nil {
 
 var rawInput bool = false
 var fpMouse bool = false
-type MousePos struct {
-    X float64
-    Y float64
-}
-var mousePos MousePos
 
 reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
+//	var cursor C.POINT
+//	C.GetCursorPos(&cursor)
+//	fmt.Println(cursor)
 
 		//fmt.Println(string(msg.Data))
 
@@ -238,7 +262,7 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 			return
 		}
 
-		//Check for First Person Mouse Mode
+		//Check for first person mouse
 		if string(msg.Data) == "fpMouseOn" {
 			fpMouse = true
 			return
@@ -248,6 +272,7 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 			return
 		}
 
+
     //User Input Map
     controls := make(map[string]interface{})
 
@@ -255,27 +280,20 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
       fmt.Println(err)
     }
 
-    //fmt.Println(controls)
-
     if _, ok := controls["X"]; ok {
       mouseX := controls["X"].(float64)  //Javascript uses float64?
       mouseY := controls["Y"].(float64)
 
-			if fpMouse {
 				if rawInput{
-					mousePos.X = 1600 / 2
-					mousePos.Y = 900 / 2
-					C.MouseMoveRaw(C.int(mousePos.X + mouseX), C.int(mousePos.Y + mouseY))
-				}else{
-					C.MouseMove(C.int(mouseX), C.int(mouseY))
-				}
-			}else{
-				if rawInput{
+					//Relative movement, current cursor x & y + passed x & y ints
 					C.MouseMoveRaw(C.int(mouseX), C.int(mouseY))
+				}else if fpMouse{
+					//Relative movement, current cursor x & y + passed x & y ints
+					C.MouseMoveFor3DGames(C.int(mouseX), C.int(mouseY))
 				}else{
+					//Absolute coords movement
 					C.MouseMove(C.int(mouseX), C.int(mouseY))
 				}
-			}
 
     }else if _, ok := controls["keyDown"]; ok {
 			if controls["keyDown"].(float64) != 17 {  //Extended keys work differnt, check out robot.js keypress.c, 17 is the ctrl key
@@ -434,7 +452,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	x264Params.BitRate = 8_000_000 // 1000kbps
+	x264Params.BitRate = 10_000_000 // 10,000kbps
 	x264Params.KeyFrameInterval = 1  //default 60
 	x264Params.Preset = x264.PresetVeryfast
 	//openh264Params.BitRate = 4_000_000 // 4000kbps

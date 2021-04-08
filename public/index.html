@@ -8,6 +8,14 @@
     <video style="pointer-events: none;" id="myVid" autoplay muted playsinline></video>
     </div>
 
+    Mouse Sensitivity:
+    <input id="fpSensitivity"  value=1 ></input>
+
+
+
+
+
+
     <button onclick="openFullscreen()">Fullscreen</button>
     <button id="mouseToggle" onclick="rawMouseToggle()">Raw Mouse Input Off</button>
     <button id="gameMode" onclick="mouseModeToggle()">First Person Mouse Off</button>
@@ -36,7 +44,7 @@ function sendPassword(){
 
 //=======================Fullscreen & Canvas Resize Stuff=================================
 
-/* Get the element you want displayed in fullscreen mode */
+/* Get the element you want displayed in fullscreen mode (a video in this example): */
 var elem = document.getElementById("vidDiv");
 
 
@@ -221,10 +229,10 @@ window.addEventListener("mousemove", function (e) {
     //https://www.w3schools.com/jsref/obj_mouseevent.asp
     //movementX/Y relative to last mousemove
     if(e.movementX != 0){
-      mouse.X = (1600/window.innerWidth) * e.movementX;
+      mouse.X = (1600/window.innerWidth) * e.movementX * document.getElementById("fpSensitivity").value;
     }
     if(e.movementY != 0){
-      mouse.Y = (900/window.innerHeight) * e.movementY;
+      mouse.Y = (900/window.innerHeight) * e.movementY * document.getElementById("fpSensitivity").value;
     }
   }else{
     mouse.X = (1600/window.innerWidth) * e.x;
@@ -248,6 +256,9 @@ window.addEventListener("mousedown", function (e) {
     TCPChan.send("mouseDown");
   }else if (e.button == 2) { //2 = right click
     TCPChan.send("rightMouseDown");
+  }else if (e.button == 1) {
+    cursorToggle();
+    mouseModeToggle();
   }
 });
 //Stop Right Click Bringing Up Menu

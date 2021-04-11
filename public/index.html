@@ -11,6 +11,11 @@
     Mouse Sensitivity:
     <input id="fpSensitivity"  value=1 ></input>
 
+
+
+
+
+
     <button onclick="openFullscreen()">Fullscreen</button>
     <button id="mouseToggle" onclick="rawMouseToggle()">Raw Mouse Input Off</button>
     <button id="gameMode" onclick="mouseModeToggle()">First Person Mouse Off</button>
@@ -89,10 +94,12 @@ function rawMouseToggle(){
 function mouseModeToggle(){
   if (document.getElementById("gameMode").innerText == "First Person Mouse Off"){
     document.getElementById("gameMode").innerText = "First Person Mouse On";
+    document.getElementById("vidDiv").requestPointerLock();  //locks mouse in center of div and sets cursor: none
     TCPChan.send("fpMouseOn");
     fpMouse = true;
   }else{
     document.getElementById("gameMode").innerText = "First Person Mouse Off";
+    document.exitPointerLock();
     TCPChan.send("fpMouseOff");
     fpMouse = false;
   }
@@ -123,7 +130,7 @@ const log = msg => {
           ws.onclose = function(evt) {
               console.log("CLOSE");
               ws = null;
-              document.write("Websocket Close");
+              //document.write("Websocket Close");
           }
           ws.onmessage = function(evt) {
               console.log("RESPONSE: " + evt.data);
@@ -252,7 +259,6 @@ window.addEventListener("mousedown", function (e) {
   }else if (e.button == 2) { //2 = right click
     TCPChan.send("rightMouseDown");
   }else if (e.button == 1) {
-    cursorToggle();
     mouseModeToggle();
   }
 });

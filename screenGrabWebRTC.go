@@ -129,6 +129,7 @@ import "C"
 
 import (
 	"log"
+	"net"
 	"net/http"
 	//"strings"
 	"encoding/json"
@@ -186,7 +187,7 @@ func echo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//webrtc stuffffffffff
-
+	/*
 	config := webrtc.Configuration{
 		ICEServers: []webrtc.ICEServer{
 			{
@@ -194,9 +195,10 @@ func echo(w http.ResponseWriter, r *http.Request) {
 			},
 		},
 	}
-
+	*/
 	// Create a new RTCPeerConnection
-	peerConnection, err := api.NewPeerConnection(config)
+	//peerConnection, err := api.NewPeerConnection(config)
+	peerConnection, err := api.NewPeerConnection(webrtc.Configuration{})
 	if err != nil {
 		panic(err)
 	}
@@ -419,8 +421,8 @@ var s mediadevices.MediaStream
 var x264Params x264.Params
 var codecSelector *mediadevices.CodecSelector
 var mediaEngine = webrtc.MediaEngine{}
-var api = webrtc.NewAPI(webrtc.WithMediaEngine(&mediaEngine))
-
+//var api = webrtc.NewAPI(webrtc.WithMediaEngine(&mediaEngine))
+var api *webrtc.API
 //==============================================================================
 
 //===================Key Simulation Stuff=======================================
@@ -452,7 +454,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	x264Params.BitRate = 10_000_000 // 10,000kbps
+	x264Params.BitRate = 5_000_000 // 10,000kbps
 	x264Params.KeyFrameInterval = 1  //default 60
 	x264Params.Preset = x264.PresetVeryfast
 	//openh264Params.BitRate = 4_000_000 // 4000kbps
@@ -479,6 +481,32 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	// Listen on UDP Port 80, will be used for all WebRTC traffic
+	udpListener, err := net.ListenUDP("udp", &net.UDPAddr{
+		IP:   net.IP{0, 0, 0, 0},
+		Port: 80,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("Listening for WebRTC traffic at %s\n", udpListener.LocalAddr())
+
+	// Create a SettingEngine, this allows non-standard WebRTC behavior
+	settingEngine := webrtc.SettingEngine{}
+
+	//Our Public Candidate is declared here cause were not using a STUN server for discovery
+	//and just hardcoding the open port, and port forwarding webrtc traffic on the router
+	settingEngine.SetNAT1To1IPs([]string{"162.200.58.171"}, webrtc.ICECandidateTypeHost)
+
+	// Configure our SettingEngine to use our UDPMux. By default a PeerConnection has
+	// no global state. The API+SettingEngine allows the user to share state between them.
+	// In this case we are sharing our listening port across many.
+	settingEngine.SetICEUDPMux(webrtc.NewICEUDPMux(nil, udpListener))
+
+	// Create a new API using our SettingEngine & MediaEngine
+	api = webrtc.NewAPI(webrtc.WithSettingEngine(settingEngine), webrtc.WithMediaEngine(&mediaEngine))
 
 	//Start keyLoop
 	go keyLoop()

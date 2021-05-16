@@ -449,7 +449,7 @@ func main() {
 	flag.Parse()
 
 	fmt.Println("Password to connect (can be changed with -password flag): " + *password)
-//162.200.58.171
+
 	if *webRTCIP == "" {
 		fmt.Println("Usage Example: screenGrabWebRTC.exe -ip 127.0.0.0")
 		fmt.Println("Optionally: screenGrabWebRTC.exe -bitrate 10000000 -ip 127.0.0.0")

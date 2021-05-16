@@ -23,7 +23,7 @@
 
     <div id="logs"></div>
 
-    <input id="password">Type Password Here</input>
+    <input id="password" disabled>Type Password Here</input>
     <button onclick="sendPassword()">Send Password</button>
 
   </body>
@@ -38,6 +38,7 @@ var fpMouse = false;
 
 function sendPassword(){
   var a = document.getElementById("password").value;
+  //TCPChan.send("password" + a);
   ws.send(a);
 }
 
@@ -126,6 +127,7 @@ const log = msg => {
 
           ws.onopen = function(evt) {
               console.log("OPEN");
+              document.getElementById("password").disabled = false;
           }
           ws.onclose = function(evt) {
               console.log("CLOSE");

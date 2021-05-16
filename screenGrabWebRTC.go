@@ -183,7 +183,7 @@ func echo(w http.ResponseWriter, r *http.Request) {
 		log.Println("readPassErr:", err)
 	}
 
-	if string(message) != "itGameTime" {
+	if string(message) != *password {
 		return  //if password wrong don't let gamer connect
 	}
 
@@ -416,6 +416,7 @@ var codecSelector *mediadevices.CodecSelector
 var mediaEngine = webrtc.MediaEngine{}
 //var api = webrtc.NewAPI(webrtc.WithMediaEngine(&mediaEngine))
 var api *webrtc.API
+var password *string
 //==============================================================================
 
 //===================Key Simulation Stuff=======================================
@@ -444,12 +445,15 @@ func main() {
 	//First Get Command Line Arguments (Flags)
 	bitRate := flag.Int("bitrate", 5_000_000, "Integer Value For Video BitRate")
 	webRTCIP := flag.String("ip", "", "IP for this computer for the browser webRTC peer to connect to")
+	password = flag.String("password", "itGameTime", "The Password For the Browser Peer to Type and Send to Connect")
 	flag.Parse()
 
+	fmt.Println("Password to connect (can be changed with -password flag): " + *password)
+//162.200.58.171
 	if *webRTCIP == "" {
 		fmt.Println("Usage Example: screenGrabWebRTC.exe -ip 127.0.0.0")
 		fmt.Println("Optionally: screenGrabWebRTC.exe -bitrate 10000000 -ip 127.0.0.0")
-		fmt.Println("To Look At Help: screenGrabWebRTC.exe -help")
+		fmt.Println("Or: screenGrabWebRTC.exe -help")
 		return
 	}
 

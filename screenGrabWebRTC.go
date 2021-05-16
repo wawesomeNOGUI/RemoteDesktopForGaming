@@ -137,6 +137,7 @@ import (
 	//"strconv"
 	"time"
 	"sync"
+	"flag"
 
 	"github.com/gorilla/websocket"
 
@@ -224,21 +225,13 @@ if err != nil {
   panic(err)
 }
 
-	// Register channel opening handling
-	reliableChannel.OnOpen(func() {
-
-	})
+// Register channel opening handling
+reliableChannel.OnOpen(func() {})
 
 var rawInput bool = false
 var fpMouse bool = false
 
 reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
-//	var cursor C.POINT
-//	C.GetCursorPos(&cursor)
-//	fmt.Println(cursor)
-
-		//fmt.Println(string(msg.Data))
-
 		//Check For Mouse Clicks
 		if string(msg.Data) == "mouseDown" {
 			C.MouseDown()
@@ -448,13 +441,24 @@ var keysDown sync.Map
 //==============================================================================
 
 func main() {
+	//First Get Command Line Arguments (Flags)
+	bitRate := flag.Int("bitrate", 5_000_000, "Integer Value For Video BitRate")
+	webRTCIP := flag.String("ip", "", "IP for this computer for the browser webRTC peer to connect to")
+	flag.Parse()
+
+	if *webRTCIP == "" {
+		fmt.Println("Usage Example: screenGrabWebRTC.exe -ip 127.0.0.0")
+		fmt.Println("Optionally: screenGrabWebRTC.exe -bitrate 10000000 -ip 127.0.0.0")
+		fmt.Println("To Look At Help: screenGrabWebRTC.exe -help")
+		return
+	}
 
 	//Setup Video Stream
 	x264Params, err := x264.NewParams()
 	if err != nil {
 		panic(err)
 	}
-	x264Params.BitRate = 5_000_000 // 10,000kbps
+	x264Params.BitRate = *bitRate    // default 5_000_000 bps (5mbps)
 	x264Params.KeyFrameInterval = 1  //default 60
 	x264Params.Preset = x264.PresetVeryfast
 	//openh264Params.BitRate = 4_000_000 // 4000kbps
@@ -498,7 +502,7 @@ func main() {
 
 	//Our Public Candidate is declared here cause were not using a STUN server for discovery
 	//and just hardcoding the open port, and port forwarding webrtc traffic on the router
-	settingEngine.SetNAT1To1IPs([]string{"162.200.58.171"}, webrtc.ICECandidateTypeHost)
+	settingEngine.SetNAT1To1IPs([]string{*webRTCIP}, webrtc.ICECandidateTypeHost)
 
 	// Configure our SettingEngine to use our UDPMux. By default a PeerConnection has
 	// no global state. The API+SettingEngine allows the user to share state between them.

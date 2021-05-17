@@ -144,7 +144,7 @@ import (
 	"github.com/pion/mediadevices"
 	"github.com/pion/mediadevices/examples/internal/signal"
 	//"github.com/pion/mediadevices/pkg/frame"
-	//"github.com/pion/mediadevices/pkg/prop"
+	"github.com/pion/mediadevices/pkg/prop"
 	"github.com/pion/webrtc/v3"
 
 	// If you don't like x264, you can also use vpx by importing as below
@@ -446,6 +446,7 @@ func main() {
 	bitRate := flag.Int("bitrate", 5_000_000, "Integer Value For Video BitRate")
 	webRTCIP := flag.String("ip", "", "IP for this computer for the browser webRTC peer to connect to")
 	password = flag.String("password", "itGameTime", "The Password For the Browser Peer to Type and Send to Connect")
+	frameRate := flag.Float64("fps", 60, "requested frameRate for screen capture (can also be decimal values)")
 	flag.Parse()
 
 	fmt.Println("Password to connect (can be changed with -password flag): " + *password)
@@ -481,6 +482,7 @@ func main() {
 			//c.FrameFormat = prop.FrameFormatExact(frame.FormatI420)
 			//c.Width = prop.Int(640)
 			//c.Height = prop.Int(480)
+			c.FrameRate = prop.Float(*frameRate)
 		},
 		//Audio: func(c *mediadevices.MediaTrackConstraints) {
 		//},

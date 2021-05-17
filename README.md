@@ -7,3 +7,17 @@ great with the remote keyboard events.
 The program consists of a Go program you run on your Windows PC that serves as a web server and WebRTC peer.
 Any client who wants to connect navigates to the website in their browser, and the Go program streams the PC's
 screen to the browser client, and lets the browser send back mouse events and keyboard events to execute remotely on the PC.
+
+# Downloading
+You need to download the source code and exe from the github releases tab on the right.
+
+# Running
+After you have downloaded the source code and screenGrabWebRTC.exe:
+
+ - Extract the source code wherever you'd like, and place screenGrabWebRTC.exe inside that folder.
+ - Now inside that extracted folder you should have the public folder, screenGrabWebRTC.exe, and screenGrabWebRTC.go.
+ - Next navigate into the public folder and open index.html with a text editor and change the address the websocket request is made to to the computer you want to remote into, and edit the resolution in the mouse events (I'll insert the line numbers to cange later).
+ - Next port forward 80 on your router and map it to the local computer address you want to remote into.
+ - Finally open command prompt and execute `screenGrabWebRTC.exe -h` to see all the flag options you have. (e.g screenGrabWebRTC.exe -ip 127.0.0.1 -fps 30)
+ 
+ Thanks for checking out this project!

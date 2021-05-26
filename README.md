@@ -16,7 +16,7 @@ After you have downloaded the source code and screenGrabWebRTC.exe:
 
  - Extract the source code wherever you'd like, and place screenGrabWebRTC.exe inside that folder.
  - Now inside that extracted folder you should have the public folder, screenGrabWebRTC.exe, and screenGrabWebRTC.go.
- - Next navigate into the public folder and open index.html with a text editor and change the address the websocket request is made to to the computer you want to remote into, and edit the resolution in the mouse events (I'll insert the line numbers to cange later).
+ - Next navigate into the public folder and open index.html with a text editor and change the address the websocket request is made to to the computer you want to remote into (here)[https://github.com/wawesomeNOGUI/RemoteDesktopForGaming/blob/948e7983cd68dee31316d20a1ad2485d74ddf1ef/public/index.html#L126], and edit the resolution (the two 1600s are width adn two 900s are height) in the mouse events (here)[https://github.com/wawesomeNOGUI/RemoteDesktopForGaming/blob/948e7983cd68dee31316d20a1ad2485d74ddf1ef/public/index.html#L236].
  - Next port forward 80 on your router and map it to the local computer address you want to remote into.
  - Finally open command prompt and execute `screenGrabWebRTC.exe -h` to see all the flag options you have. (e.g screenGrabWebRTC.exe -ip 127.0.0.1 -fps 30)
  

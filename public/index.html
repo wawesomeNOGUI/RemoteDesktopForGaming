@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
+  hi
   <body>
 
     <!-- Has To be muted for autoplay to work -->
     <div id="vidDiv" style="">
-    <video style="pointer-events: none;" id="myVid" autoplay muted playsinline></video>
+    <canvas id="myCanvas"></canvas>
     </div>
 
+    <video style="pointer-events: none; padding: 0px; margin: 0px;" id="myVid" width=0 height=0 autoplay muted playsinline></video>
+
     Mouse Sensitivity:
-    <input id="fpSensitivity"  value=1 ></input>
-
-
-
-
-
+    <input type="number" id="fpSensitivity" value=1></input>
+    Frames Per Second (type in a new value to change automagically):
+    <input type="number" id="fps" min=1 value=60></input>
 
     <button onclick="openFullscreen()">Fullscreen</button>
     <button id="mouseToggle" onclick="rawMouseToggle()">Raw Mouse Input Off</button>
@@ -35,6 +35,8 @@
 var ws;
 var TCPChan;
 var fpMouse = false;
+
+var ctx = document.getElementById("myCanvas").getContext("2d")
 
 function sendPassword(){
   var a = document.getElementById("password").value;
@@ -77,8 +79,10 @@ if(!document.fullscreenElement){     //if not in fullscreen enter fullscreen els
 
 function resizeVideo(){
   //Resize video
-  document.getElementById("myVid").width = window.innerWidth;
-  document.getElementById("myVid").height = window.innerHeight;
+  //document.getElementById("myVid").width = window.innerWidth;
+  //document.getElementById("myVid").height = window.innerHeight;
+  document.getElementById("myCanvas").width = window.innerWidth;
+  document.getElementById("myCanvas").height = window.innerHeight;
 }
 
 function rawMouseToggle(){
@@ -151,11 +155,29 @@ const log = msg => {
           }]
         })
 
-        //video player
+        //video player in canvas
+        var prevTime;
+        var drawing = false;
+        function canvasDraw(){
+          //Check for new frame received (might not work too well cause of HTML video playback speed variation?)
+          if(document.getElementById("myVid").currentTime != prevTime){
+            ctx.drawImage(document.getElementById("myVid"), 0, 0, document.getElementById("myCanvas").width, document.getElementById("myCanvas").height);
+            prevTime = document.getElementById("myVid").currentTime;
+          }
+          //console.log(1000/document.getElementById("fps").value);
+          setTimeout(function(){requestAnimationFrame(canvasDraw);}, 1000/document.getElementById("fps").value);
+        }
+
         pc.ontrack = event => {
           //const el = document.createElement(event.track.kind);
           const el = document.getElementById("myVid");
           el.srcObject = event.streams[0];
+          document.getElementById("myCanvas").width = window.innerWidth;
+          document.getElementById("myCanvas").height = window.innerHeight;
+          if(!drawing){
+            requestAnimationFrame(canvasDraw);
+            drawing = true;
+          }
           //el.autoplay = true;
           //el.load();
           //el.controls = false;

@@ -78,6 +78,15 @@ void MouseUp ()
   SendInput(1,&Input,sizeof(INPUT));
 }
 
+void MouseWheel (int a)
+{
+	INPUT  Input={0};
+	Input.type = INPUT_MOUSE;
+	Input.mi.mouseData = a;
+	Input.mi.dwFlags = MOUSEEVENTF_WHEEL;
+	SendInput(1,&Input,sizeof(INPUT));
+}
+
 void RightMouseDown ()
 {
   INPUT  Input={0};
@@ -208,12 +217,23 @@ func echo(w http.ResponseWriter, r *http.Request) {
 	// This will notify you when the peer has connected/disconnected
 	peerConnection.OnICEConnectionStateChange(func(connectionState webrtc.ICEConnectionState) {
 		log.Printf("Connection State has changed %s \n", connectionState.String())
-
+		// Disconnected
 		if connectionState == 5 || connectionState == 6 || connectionState == 7 {
 			err := peerConnection.Close() //deletes all references to this peerconnection in mem and same for ICE agent (ICE agent releases the "closed" status)?
 			if err != nil {               //https://www.w3.org/TR/webrtc/#dom-rtcpeerconnection-close
 				fmt.Println(err)
 			}
+
+			//Stop pressing keys/mouse in case disconnected before keyUp/mouseup messages
+			C.MouseUp()
+			C.RightMouseUp()
+
+			//Delete pressed keys, and do keyups
+			keysDown.Range(func(key, value interface{}) bool {
+				C.KeySimulate(C.WORD(key.(float64)), false) //keyup
+				keysDown.Delete(key)
+				return true
+			})
 		}
 	})
 
@@ -311,6 +331,8 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 				C.KeySimulate(C.WORD(controls["keyUp"].(float64)), false)
 			}
 
+		}else if _, ok := controls["wheel"]; ok {
+			C.MouseWheel(C.int(controls["wheel"].(float64)))
 		}
 
 })
@@ -413,17 +435,6 @@ reliableChannel.OnMessage(func(msg webrtc.DataChannelMessage) {
 
 }
 
-//==================Global WebRTC Vars==========================================
-//var peerConnection PeerConnection
-var s mediadevices.MediaStream
-var x264Params x264.Params
-var codecSelector *mediadevices.CodecSelector
-var mediaEngine = webrtc.MediaEngine{}
-//var api = webrtc.NewAPI(webrtc.WithMediaEngine(&mediaEngine))
-var api *webrtc.API
-var password *string
-//==============================================================================
-
 //===================Key Simulation Stuff=======================================
 //repeatedly press keys that are down
 func keyLoop(){
@@ -446,20 +457,32 @@ func keyLoop(){
 var keysDown sync.Map
 //==============================================================================
 
+//==================Global WebRTC Vars==========================================
+//var peerConnection PeerConnection
+var s mediadevices.MediaStream
+var x264Params x264.Params
+var codecSelector *mediadevices.CodecSelector
+var mediaEngine = webrtc.MediaEngine{}
+//var api = webrtc.NewAPI(webrtc.WithMediaEngine(&mediaEngine))
+var api *webrtc.API
+var password *string
+//==============================================================================
+
 func main() {
 	//First Get Command Line Arguments (Flags)
 	bitRate := flag.Int("bitrate", 5_000_000, "Integer Value For Video BitRate")
 	webRTCIP := flag.String("ip", "", "IP for this computer for the browser webRTC peer to connect to")
 	password = flag.String("password", "itGameTime", "The Password For the Browser Peer to Type and Send to Connect")
-	frameRate := flag.Float64("fps", 60, "requested frameRate for screen capture (can also be decimal values)")
+	frameRate := flag.Float64("fps", 60, "frameRate for screen capture (can also be decimal values)")
+	keyFrameInterval := flag.Int("keyFrameInterval", 1, "Integer Value How Many Frames Between A KeyFrame (Keyframes can be decoded on their own without other reference frames)")
 	flag.Parse()
 
 	fmt.Println("Password to connect (can be changed with -password flag): " + *password)
 
 	if *webRTCIP == "" {
 		fmt.Println("Usage Example: screenGrabWebRTC.exe -ip 127.0.0.0")
-		fmt.Println("Optionally: screenGrabWebRTC.exe -bitrate 10000000 -ip 127.0.0.0")
-		fmt.Println("Or: screenGrabWebRTC.exe -help")
+		fmt.Println("You Can Optionally Change Video Params: screenGrabWebRTC.exe -bitrate 10000000 -ip 127.0.0.0")
+		fmt.Println("Or List All Avaible Flags: screenGrabWebRTC.exe -help")
 		return
 	}
 
@@ -469,7 +492,7 @@ func main() {
 		panic(err)
 	}
 	x264Params.BitRate = *bitRate    // default 5_000_000 bps (5mbps)
-	x264Params.KeyFrameInterval = 1  //default 60
+	x264Params.KeyFrameInterval = *keyFrameInterval  //default 60
 	x264Params.Preset = x264.PresetVeryfast
 	//openh264Params.BitRate = 4_000_000 // 4000kbps
 	//openh264Params.BitRate = 0

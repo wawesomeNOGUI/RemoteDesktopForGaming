@@ -6,7 +6,7 @@
     <canvas id="myCanvas"></canvas>
     </div>
 
-    <!-- Video has to be muted for autoplay to work -->
+    <!-- Has To be muted for autoplay to work -->
     <video style="pointer-events: none; padding: 0px; margin: 0px;" id="myVid" width=0 height=0 autoplay muted playsinline></video>
 
     Mouse Sensitivity:
@@ -157,14 +157,17 @@ const log = msg => {
         var prevTime;
         var drawing = false;
         function canvasDraw(){
-          //Check for new frame received (might not work too well cause of HTML video playback speed variation?)
+          //Check for new frame received
           if(document.getElementById("myVid").currentTime != prevTime){
             ctx.drawImage(document.getElementById("myVid"), 0, 0, document.getElementById("myCanvas").width, document.getElementById("myCanvas").height);
+            //document.getElementById("myVid").currentTime += 1000/document.getElementById("fps").value;
             prevTime = document.getElementById("myVid").currentTime;
           }
           //console.log(1000/document.getElementById("fps").value);
           setTimeout(function(){requestAnimationFrame(canvasDraw);}, 1000/document.getElementById("fps").value);
         }
+
+        //setInterval(function(){console.log(document.getElementById("myVid").currentTime)}, 1000);
 
         pc.ontrack = event => {
           //const el = document.createElement(event.track.kind);
@@ -283,6 +286,14 @@ window.addEventListener("mousedown", function (e) {
   }else if (e.button == 1) {
     mouseModeToggle();
   }
+});
+
+var MouseWheel = {
+  wheel: 0
+}
+window.addEventListener('mousewheel', function(e){
+  MouseWheel.wheel = -e.deltaY;
+  TCPChan.send(JSON.stringify(MouseWheel));
 });
 //Stop Right Click Bringing Up Menu
 window.addEventListener("contextmenu", function(event){

@@ -91,7 +91,7 @@ func newEncoder(r video.Reader, p prop.Media, params Params) (codec.ReadCloser, 
 		engine: engine,
 		r:      video.ToI420(r),
 	}
-	return codec.ReadCloser(&e), nil
+	return e, nil
 }
 
 func (e *encoder) Read() ([]byte, func(), error) {

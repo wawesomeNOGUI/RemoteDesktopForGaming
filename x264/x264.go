@@ -60,7 +60,7 @@ var (
 	errEncode        = fmt.Errorf("failed to encode")
 )
 
-func newEncoder(r video.Reader, p prop.Media, params Params) (*encoder, error) {
+func newEncoder(r video.Reader, p prop.Media, params Params) (codec.ReadCloser, error) {
 	if params.KeyFrameInterval == 0 {
 		params.KeyFrameInterval = 60
 	}
@@ -91,7 +91,7 @@ func newEncoder(r video.Reader, p prop.Media, params Params) (*encoder, error) {
 		engine: engine,
 		r:      video.ToI420(r),
 	}
-	return &e, nil
+	return codec.ReadCloser(&e), nil
 }
 
 func (e *encoder) Read() ([]byte, func(), error) {

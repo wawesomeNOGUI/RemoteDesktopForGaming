@@ -60,7 +60,7 @@ var (
 	errEncode        = fmt.Errorf("failed to encode")
 )
 
-func newEncoder(r video.Reader, p prop.Media, params Params) (*encoder, error) {
+func newEncoder(r video.Reader, p prop.Media, params Params) (codec.ReadCloser, error) {
 	if params.KeyFrameInterval == 0 {
 		params.KeyFrameInterval = 60
 	}

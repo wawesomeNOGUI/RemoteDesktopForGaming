@@ -3,7 +3,7 @@
 // Reference: https://code.videolan.org/videolan/x264/blob/master/example.c
 package x264
 
-// #cgo pkg-config: x264
+// #cgo  LDFLAGS: ./x264/x264Lib/libx264.a
 // #include "bridge.h"
 import "C"
 import (

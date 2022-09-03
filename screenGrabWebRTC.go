@@ -151,7 +151,7 @@ import (
 	"github.com/gorilla/websocket"
 
 	"github.com/pion/mediadevices"
-	"github.com/pion/mediadevices/examples/internal/signal"
+	"github.com/wawesomeNOGUI/RemoteDesktopForGaming/signal"
 	//"github.com/pion/mediadevices/pkg/frame"
 	"github.com/pion/mediadevices/pkg/prop"
 	"github.com/pion/webrtc/v3"
@@ -163,7 +163,8 @@ import (
 	// or if you use a raspberry pi like, you can use mmal for using its hardware encoder
 	//"github.com/pion/mediadevices/pkg/codec/mmal"
 	//"github.com/pion/mediadevices/pkg/codec/opus" // This is required to use opus audio encoder
-	"github.com/pion/mediadevices/pkg/codec/x264" // This is required to use h264 video encoder
+	//"github.com/pion/mediadevices/pkg/codec/x264" // This is required to use h264 video encoder
+	"github.com/wawesomeNOGUI/RemoteDesktopForGaming/x264"
 
 	// Note: If you don't have a camera or microphone or your adapters are not supported,
 	//       you can always swap your adapters with our dummy adapters below.

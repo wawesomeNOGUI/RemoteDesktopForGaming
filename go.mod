@@ -6,8 +6,8 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/pion/mediadevices v0.3.11
 	github.com/pion/webrtc/v3 v3.1.43
-	github.com/wawesomeNOGUI/RemoteDesktopForGaming v0.0.0-20220903215935-8c0aee583162
-	github.com/wawesomeNOGUI/RemoteDesktopForGaming/signal v0.0.0-20220903213136-27a48cd6793f
+	github.com/wawesomeNOGUI/RemoteDesktopForGaming/signal v0.0.0-20220903224356-7b09d7555be1
+	github.com/wawesomeNOGUI/RemoteDesktopForGaming/x264 v0.0.0-20220903224356-7b09d7555be1
 )
 
 require (

@@ -97,12 +97,10 @@ github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.1 h1:5TQK59W5E3v0r2duFAb7P95B6hEeOyEnHRa8MjYSMTY=
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/wawesomeNOGUI/RemoteDesktopForGaming v0.0.0-20220903211959-1fdb71c4587c h1:YDhYd+43gFDRCcZKi+abHyCqRrjy7tkwVSHt3+O0UYI=
-github.com/wawesomeNOGUI/RemoteDesktopForGaming v0.0.0-20220903211959-1fdb71c4587c/go.mod h1:q3K7ESzLTzkmniU33/lZ/bL686uXy8DMHoeQLWT8m+I=
-github.com/wawesomeNOGUI/RemoteDesktopForGaming v0.0.0-20220903215935-8c0aee583162 h1:qAeQjzuYzvII/fcWYS8sLVxwWCZe1OrPTuwqe0qOL4s=
-github.com/wawesomeNOGUI/RemoteDesktopForGaming v0.0.0-20220903215935-8c0aee583162/go.mod h1:q3K7ESzLTzkmniU33/lZ/bL686uXy8DMHoeQLWT8m+I=
-github.com/wawesomeNOGUI/RemoteDesktopForGaming/signal v0.0.0-20220903213136-27a48cd6793f h1:yOlwwenfz08EURKMOvEk8a19j7VaO9jmhP60LEWyfdU=
-github.com/wawesomeNOGUI/RemoteDesktopForGaming/signal v0.0.0-20220903213136-27a48cd6793f/go.mod h1:ExotytsLPFTvzXc3lKygMFY649zn/kG7qPMqCh6Bk1k=
+github.com/wawesomeNOGUI/RemoteDesktopForGaming/signal v0.0.0-20220903224356-7b09d7555be1 h1:MfwNwz9p71znJAM6tN8R3/Af3Tek1dKsqf+/obedAfc=
+github.com/wawesomeNOGUI/RemoteDesktopForGaming/signal v0.0.0-20220903224356-7b09d7555be1/go.mod h1:ExotytsLPFTvzXc3lKygMFY649zn/kG7qPMqCh6Bk1k=
+github.com/wawesomeNOGUI/RemoteDesktopForGaming/x264 v0.0.0-20220903224356-7b09d7555be1 h1:RxznvgrKibeyLDLFvzfIuSJdDf4jAjHPdfu8nUesUho=
+github.com/wawesomeNOGUI/RemoteDesktopForGaming/x264 v0.0.0-20220903224356-7b09d7555be1/go.mod h1:vstwJh93CNlrqO/F8Dl3exaF43EMYvkHbkaQ5i/3rTc=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=

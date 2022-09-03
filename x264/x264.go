@@ -3,7 +3,7 @@
 // Reference: https://code.videolan.org/videolan/x264/blob/master/example.c
 package x264
 
-// #cgo pkg-config: x264
+// #cgo pkg-config: x264 
 // #include "bridge.h"
 import "C"
 import (
@@ -124,16 +124,12 @@ func (e *encoder) Read() ([]byte, func(), error) {
 	return encoded, func() {}, err
 }
 
-// TODO: Implement bit rate control
-//var _ codec.BitRateController = (*encoder)(nil)
-
-func (e *encoder) ForceKeyFrame() error {
-	e.engine.force_key_frame = C.int(1)
-	return nil
+func (e *encoder) SetBitRate(b int) error {
+	panic("SetBitRate is not implemented")
 }
 
-func (e *encoder) Controller() codec.EncoderController {
-	return e
+func (e *encoder) ForceKeyFrame() error {
+	panic("ForceKeyFrame is not implemented")
 }
 
 func (e *encoder) Close() error {

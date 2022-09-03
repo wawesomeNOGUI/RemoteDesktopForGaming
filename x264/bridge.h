@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <x264-master/x264.h>
+#include <x264Lib/x264.h>
 
 #define ERR_DEFAULT_PRESET -1
 #define ERR_APPLY_PROFILE -2

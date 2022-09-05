@@ -150,6 +150,8 @@ import (
 
 	"github.com/gorilla/websocket"
 
+	"github.com/kbinani/screenshot"
+
 	"github.com/pion/mediadevices"
 	"github.com/wawesomeNOGUI/RemoteDesktopForGaming/signal"
 	//"github.com/pion/mediadevices/pkg/frame"
@@ -470,6 +472,9 @@ var password *string
 //==============================================================================
 
 func main() {
+	screenshot.Setup()
+	defer screenshot.TearDown()
+
 	//First Get Command Line Arguments (Flags)
 	bitRate := flag.Int("bitrate", 5_000_000, "Integer Value For Video BitRate")
 	webRTCIP := flag.String("ip", "", "IP for this computer for the browser webRTC peer to connect to")

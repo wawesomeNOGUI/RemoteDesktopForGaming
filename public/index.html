@@ -30,6 +30,9 @@
 
 <script>
 
+const WIDTH = 1600;
+const HEIGHT = 900;
+
 var ws;
 var TCPChan;
 var fpMouse = false;
@@ -256,14 +259,14 @@ window.addEventListener("mousemove", function (e) {
     //https://www.w3schools.com/jsref/obj_mouseevent.asp
     //movementX/Y relative to last mousemove
     if(e.movementX != 0){
-      mouse.X = (1600/window.innerWidth) * e.movementX * document.getElementById("fpSensitivity").value;
+      mouse.X = (WIDTH/window.innerWidth) * e.movementX * document.getElementById("fpSensitivity").value;
     }
     if(e.movementY != 0){
-      mouse.Y = (900/window.innerHeight) * e.movementY * document.getElementById("fpSensitivity").value;
+      mouse.Y = (HEIGHT/window.innerHeight) * e.movementY * document.getElementById("fpSensitivity").value;
     }
   }else{
-    mouse.X = (1600/window.innerWidth) * e.x;
-    mouse.Y = (900/window.innerHeight) * e.y;
+    mouse.X = (WIDTH/window.innerWidth) * e.x;
+    mouse.Y = (HEIGHT/window.innerHeight) * e.y;
   }
 
 

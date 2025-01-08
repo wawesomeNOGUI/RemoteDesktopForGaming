@@ -125,12 +125,15 @@ func NumActiveDisplays() int {
 }
 
 func GetDisplayBounds(displayIndex int) image.Rectangle {
-	//var ctx getMonitorBoundsContext
-	//ctx.Index = displayIndex
-	//ctx.Count = 0
-	//enumDisplayMonitors(win.HDC(0), nil, syscall.NewCallback(getMonitorBoundsCallback), uintptr(unsafe.Pointer(&ctx)))
-		
-	return image.Rect( 0, 0, int(win.GetSystemMetrics(win.SM_CXSCREEN)), int(win.GetSystemMetrics(win.SM_CYSCREEN)) )
+	var ctx getMonitorBoundsContext
+	ctx.Index = displayIndex
+	ctx.Count = 0
+	enumDisplayMonitors(win.HDC(0), nil, syscall.NewCallback(getMonitorBoundsCallback), uintptr(unsafe.Pointer(&ctx)))
+
+	return image.Rect(
+		int(ctx.Rect.Left), int(ctx.Rect.Top),
+		int(ctx.Rect.Right), int(ctx.Rect.Bottom))
+	// return image.Rect( 0, 0, int(win.GetSystemMetrics(win.SM_CXSCREEN)), int(win.GetSystemMetrics(win.SM_CYSCREEN)) )
 }
 
 func getDesktopWindow() win.HWND {

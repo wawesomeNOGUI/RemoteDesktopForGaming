@@ -7,6 +7,7 @@ import (
 	"image"
 	"syscall"
 	"unsafe"
+	"fmt"
 )
 
 var (
@@ -33,6 +34,9 @@ var (
 
 // call before Capture
 func Setup() {
+	// to let user know what to set width and height to for mouse movement in index.html
+	fmt.Printf("In index.html set WIDTH = %d and HEIGHT = %d \n", int(win.GetSystemMetrics(win.SM_CXSCREEN)), int(win.GetSystemMetrics(win.SM_CYSCREEN)))
+	
 	rect = GetDisplayBounds(0)
 	width := rect.Max.X
 	height := rect.Max.Y
